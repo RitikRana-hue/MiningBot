@@ -1,0 +1,7 @@
+# Mining Chatbot Dependencies
+# Core dependencies (none required for basic functionality)
+
+# Optional dependencies for future enhancements:
+# openai>=1.0.0        # For AI-powered responses
+# python-dotenv>=1.0.0 # For environment variable management
+# requests>=2.31.0     # For API calls to mining data services
