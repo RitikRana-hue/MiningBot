@@ -1,6 +1,7 @@
 "use client";
 
-import { Upload, X, FileText, Image, FileSpreadsheet } from "lucide-react";
+import { motion } from "framer-motion";
+import { Upload, X, FileText, Image, FileSpreadsheet, Sparkles, ArrowRight } from "lucide-react";
 import { useRef, useState, DragEvent } from "react";
 
 interface FileUploadProps {
@@ -58,10 +59,10 @@ export default function FileUpload({ onUpload, disabled }: FileUploadProps) {
   };
 
   const getFileIcon = (type: string) => {
-    if (type.startsWith("image/")) return <Image className="h-5 w-5" />;
+    if (type.startsWith("image/")) return <Image className="h-6 w-6" />;
     if (type.includes("spreadsheet") || type.includes("csv") || type.includes("excel"))
-      return <FileSpreadsheet className="h-5 w-5" />;
-    return <FileText className="h-5 w-5" />;
+      return <FileSpreadsheet className="h-6 w-6" />;
+    return <FileText className="h-6 w-6" />;
   };
 
   const formatFileSize = (bytes: number) => {
@@ -71,29 +72,62 @@ export default function FileUpload({ onUpload, disabled }: FileUploadProps) {
   };
 
   return (
-    <div className="p-4 border-t border-zinc-700">
+    <div className="p-4 mx-4 mb-4">
       {!selectedFile ? (
-        <div
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
           className={`
-            flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg cursor-pointer transition-colors
+            relative flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-300
             ${isDragging
-              ? "border-emerald-500 bg-emerald-500/10"
-              : "border-zinc-600 hover:border-zinc-500 hover:bg-zinc-800/50"
+              ? "border-emerald-500 bg-emerald-500/10 scale-[1.02]"
+              : "border-zinc-700 hover:border-emerald-500/50 hover:bg-zinc-800/30"
             }
             ${disabled ? "opacity-50 cursor-not-allowed" : ""}
           `}
         >
-          <Upload className={`h-8 w-8 mb-2 ${isDragging ? "text-emerald-400" : "text-zinc-400"}`} />
-          <p className="text-sm text-zinc-300 mb-1">
-            Drop files here or <span className="text-emerald-400">browse</span>
-          </p>
-          <p className="text-xs text-zinc-500">
-            Supports: Images, CSV, Excel, JSON, PDF
-          </p>
+          {/* Animated background gradient */}
+          {isDragging && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 rounded-2xl"
+            />
+          )}
+
+          <div className="relative z-10 flex flex-col items-center">
+            <motion.div
+              animate={{ y: isDragging ? -5 : 0 }}
+              className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 ${
+                isDragging
+                  ? "bg-emerald-500/20 text-emerald-400"
+                  : "bg-zinc-800 text-zinc-400"
+              }`}
+            >
+              <Upload className="h-8 w-8" />
+            </motion.div>
+            <p className="text-base font-medium text-zinc-200 mb-1">
+              {isDragging ? "Drop your file here" : "Upload a file for analysis"}
+            </p>
+            <p className="text-sm text-zinc-500 mb-3">
+              Drag & drop or <span className="text-emerald-400 hover:text-emerald-300">browse</span>
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {["Images", "CSV", "Excel", "JSON", "PDF"].map((type) => (
+                <span
+                  key={type}
+                  className="px-2 py-1 text-xs bg-zinc-800 text-zinc-500 rounded-lg"
+                >
+                  {type}
+                </span>
+              ))}
+            </div>
+          </div>
+
           <input
             ref={fileInputRef}
             type="file"
@@ -102,30 +136,38 @@ export default function FileUpload({ onUpload, disabled }: FileUploadProps) {
             className="hidden"
             disabled={disabled}
           />
-        </div>
+        </motion.div>
       ) : (
-        <div className="flex items-center gap-3 p-3 bg-zinc-800 rounded-lg">
-          <div className="flex items-center justify-center w-10 h-10 bg-zinc-700 rounded-lg text-emerald-400">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex items-center gap-4 p-4 bg-zinc-800/80 border border-zinc-700/50 rounded-2xl"
+        >
+          <div className="flex items-center justify-center w-14 h-14 bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 rounded-xl text-emerald-400">
             {getFileIcon(selectedFile.type)}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm text-zinc-200 truncate">{selectedFile.name}</p>
-            <p className="text-xs text-zinc-500">{formatFileSize(selectedFile.size)}</p>
+            <p className="text-sm font-medium text-white truncate">{selectedFile.name}</p>
+            <p className="text-xs text-zinc-500 mt-0.5">{formatFileSize(selectedFile.size)}</p>
           </div>
           <button
             onClick={handleClear}
-            className="p-1 text-zinc-400 hover:text-zinc-200 transition-colors"
+            className="p-2 text-zinc-500 hover:text-white hover:bg-zinc-700 rounded-lg transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleUpload}
             disabled={disabled}
-            className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-500 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-sm font-medium rounded-xl shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all disabled:opacity-50"
           >
+            <Sparkles className="h-4 w-4" />
             Analyze
-          </button>
-        </div>
+            <ArrowRight className="h-4 w-4" />
+          </motion.button>
+        </motion.div>
       )}
     </div>
   );

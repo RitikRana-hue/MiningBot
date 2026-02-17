@@ -1,6 +1,8 @@
 "use client";
 
-import { Bot, User } from "lucide-react";
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { HardHat, User, Copy, Check, Sparkles } from "lucide-react";
 
 interface ChatMessageProps {
   role: "user" | "assistant";
@@ -9,36 +11,99 @@ interface ChatMessageProps {
 
 export default function ChatMessage({ role, content }: ChatMessageProps) {
   const isUser = role === "user";
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
-    <div className={`py-2 ${isUser ? "bg-transparent" : "bg-zinc-900/50"}`}>
-      <div className={`mx-auto max-w-4xl px-2 flex gap-2 ${isUser ? "flex-row-reverse" : ""}`}>
-        <div
-          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full shadow-sm ${isUser ? "bg-gradient-to-br from-blue-500 to-blue-600" : "bg-gradient-to-br from-emerald-500 to-emerald-600"
-            }`}
-        >
-          {isUser ? (
-            <User className="h-3.5 w-3.5 text-white" />
-          ) : (
-            <Bot className="h-3.5 w-3.5 text-white" />
-          )}
-        </div>
-        <div className={`max-w-[75%] ${isUser ? "text-right" : ""}`}>
-          <div
-            className={`inline-block px-3 py-2 rounded-xl shadow-sm ${isUser
-                ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-blue-500/20"
-                : "bg-zinc-800 text-zinc-100 border border-zinc-700"
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className={`py-6 ${isUser ? "bg-transparent" : "bg-zinc-900/30"}`}
+    >
+      <div className="mx-auto max-w-3xl px-4">
+        <div className={`flex gap-4 ${isUser ? "flex-row-reverse" : ""}`}>
+          {/* Avatar */}
+          <div className="shrink-0">
+            <div
+              className={`flex h-10 w-10 items-center justify-center rounded-xl shadow-lg ${
+                isUser
+                  ? "bg-gradient-to-br from-blue-500 to-blue-600 shadow-blue-500/20"
+                  : "bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-emerald-500/20"
               }`}
-          >
-            <p className="text-sm leading-relaxed whitespace-pre-wrap">
-              {content}
-            </p>
+            >
+              {isUser ? (
+                <User className="h-5 w-5 text-white" />
+              ) : (
+                <HardHat className="h-5 w-5 text-white" />
+              )}
+            </div>
           </div>
-          <div className={`mt-1 text-xs text-zinc-500 ${isUser ? "text-right" : ""}`}>
-            {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+
+          {/* Message Content */}
+          <div className={`flex-1 min-w-0 ${isUser ? "text-right" : ""}`}>
+            {/* Name and time */}
+            <div className={`flex items-center gap-2 mb-2 ${isUser ? "justify-end" : ""}`}>
+              <span className="text-sm font-medium text-zinc-300">
+                {isUser ? "You" : "Mining Assistant"}
+              </span>
+              {!isUser && (
+                <span className="flex items-center gap-1 text-xs text-emerald-500">
+                  <Sparkles className="h-3 w-3" />
+                  AI
+                </span>
+              )}
+            </div>
+
+            {/* Message bubble */}
+            <div
+              className={`group relative inline-block max-w-full ${
+                isUser ? "text-right" : "text-left"
+              }`}
+            >
+              <div
+                className={`inline-block px-4 py-3 rounded-2xl ${
+                  isUser
+                    ? "bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-tr-sm"
+                    : "bg-zinc-800/80 text-zinc-100 border border-zinc-700/50 rounded-tl-sm backdrop-blur-sm"
+                }`}
+              >
+                <p className="text-[15px] leading-relaxed whitespace-pre-wrap break-words">
+                  {content}
+                </p>
+              </div>
+
+              {/* Copy button for assistant messages */}
+              {!isUser && (
+                <button
+                  onClick={handleCopy}
+                  className="absolute -right-2 top-0 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 bg-zinc-800 border border-zinc-700 rounded-lg hover:bg-zinc-700 text-zinc-400 hover:text-white"
+                  title="Copy message"
+                >
+                  {copied ? (
+                    <Check className="h-3.5 w-3.5 text-emerald-400" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5" />
+                  )}
+                </button>
+              )}
+            </div>
+
+            {/* Timestamp */}
+            <div className={`mt-1.5 text-xs text-zinc-600 ${isUser ? "text-right" : ""}`}>
+              {new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

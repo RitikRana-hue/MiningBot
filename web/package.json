@@ -1,12 +1,15 @@
 {
-  "name": "web",
-  "version": "0.1.0",
+  "name": "mining-bot",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "next lint .",
+    "lint:fix": "next lint . --fix",
+    "type-check": "tsc --noEmit",
+    "build:analyze": "ANALYZE=true next build"
   },
   "dependencies": {
     "framer-motion": "^12.34.1",
@@ -25,5 +28,9 @@
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   }
 }

@@ -58,104 +58,323 @@ export default function LandingPage() {
       <ScrollProgress />
       <Navigation />
 
-      {/* HERO SECTION - Full screen with massive typography */}
+      {/* HERO SECTION - Mining + AI Fusion */}
       <section
         ref={heroRef}
         className="relative min-h-screen flex items-center justify-center overflow-hidden"
       >
-        {/* Animated background */}
+        {/* Dark Mining Tunnel Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-zinc-950 via-zinc-900 to-emerald-950/30" />
+
+        {/* Animated Neural Network Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          {[...Array(20)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-1 h-1 bg-emerald-400 rounded-full"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+              }}
+              animate={{
+                opacity: [0.2, 1, 0.2],
+                scale: [1, 1.5, 1],
+              }}
+              transition={{
+                duration: 3 + Math.random() * 2,
+                repeat: Infinity,
+                delay: Math.random() * 2,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Mining Depth Layers - 3D Effect */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-b from-emerald-900/20 via-zinc-950 to-zinc-950" />
           <motion.div
-            className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"
-            animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-            transition={{ duration: 8, repeat: Infinity }}
+            className="absolute inset-0 border-t-2 border-emerald-500/20"
+            style={{ top: '20%' }}
+            animate={{ opacity: [0.1, 0.3, 0.1] }}
+            transition={{ duration: 4, repeat: Infinity }}
           />
           <motion.div
-            className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl"
-            animate={{ scale: [1.2, 1, 1.2], opacity: [0.3, 0.5, 0.3] }}
-            transition={{ duration: 8, repeat: Infinity, delay: 4 }}
+            className="absolute inset-0 border-t-2 border-emerald-500/15"
+            style={{ top: '40%' }}
+            animate={{ opacity: [0.1, 0.25, 0.1] }}
+            transition={{ duration: 5, repeat: Infinity, delay: 1 }}
+          />
+          <motion.div
+            className="absolute inset-0 border-t-2 border-emerald-500/10"
+            style={{ top: '60%' }}
+            animate={{ opacity: [0.1, 0.2, 0.1] }}
+            transition={{ duration: 6, repeat: Infinity, delay: 2 }}
           />
         </div>
 
-        {/* Grid pattern */}
-        <div
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage: `linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)`,
-            backgroundSize: "100px 100px",
+        {/* Glowing Orbs - Coal & AI Energy */}
+        <motion.div
+          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-radial from-amber-600/20 via-orange-500/10 to-transparent rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.3, 1],
+            x: [-20, 20, -20],
+            y: [-10, 10, -10],
           }}
+          transition={{ duration: 10, repeat: Infinity }}
+        />
+        <motion.div
+          className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-gradient-radial from-emerald-500/20 via-green-400/10 to-transparent rounded-full blur-3xl"
+          animate={{
+            scale: [1.2, 1, 1.2],
+            x: [20, -20, 20],
+            y: [10, -10, 10],
+          }}
+          transition={{ duration: 12, repeat: Infinity }}
         />
 
-        <motion.div
-          style={{ y: heroY, opacity: heroOpacity }}
-          className="relative z-10 text-center px-4 pt-20"
-        >
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="mb-8"
-          >
-            <span className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-sm">
-              <Zap className="h-4 w-4" />
-              AI-Powered Mining Intelligence
-            </span>
-          </motion.div>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-6xl sm:text-8xl md:text-9xl font-bold tracking-tighter mb-6"
-          >
-            <span className="block">COAL</span>
-            <span className="block text-emerald-400">MINING</span>
-            <span className="block text-4xl sm:text-5xl md:text-6xl font-light text-zinc-500 mt-4">
-              INTELLIGENCE
-            </span>
-          </motion.h1>
+        {/* Main Content - Split Layout */}
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 pt-20">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
 
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-xl md:text-2xl text-zinc-400 max-w-3xl mx-auto mb-12"
-          >
-            Transform your mining operations with AI-powered insights,
-            real-time monitoring, and intelligent data analysis.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
-          >
-            <MagneticButton>
-              <Link
-                href="/chat"
-                className="group relative inline-flex items-center gap-3 px-10 py-5 bg-emerald-500 text-white text-lg font-semibold rounded-full overflow-hidden"
-              >
-                <span className="relative z-10">Start Free</span>
-                <ChevronRight className="relative z-10 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                <motion.div
-                  className="absolute inset-0 bg-emerald-400"
-                  initial={{ x: "-100%" }}
-                  whileHover={{ x: 0 }}
-                  transition={{ duration: 0.3 }}
-                />
-              </Link>
-            </MagneticButton>
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-2 px-8 py-5 border border-zinc-700 text-zinc-300 text-lg font-medium rounded-full hover:bg-zinc-800/50 transition-colors"
+            {/* Left Side - Text Content */}
+            <motion.div
+              style={{ y: heroY, opacity: heroOpacity }}
+              className="space-y-8"
             >
-              <Play className="h-5 w-5" />
-              View Live Data
-            </Link>
-          </motion.div>
-        </motion.div>
+              {/* Badge */}
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6 }}
+              >
+                <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-gradient-to-r from-emerald-500/20 to-amber-500/20 border border-emerald-500/30 rounded-full backdrop-blur-sm">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Zap className="h-4 w-4 text-emerald-400" />
+                  </motion.div>
+                  <span className="text-emerald-300 text-sm font-semibold tracking-wide">AI-POWERED MINING INTELLIGENCE</span>
+                  <div className="flex gap-1">
+                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
+                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Headline - Stacked Modern Typography */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="space-y-4"
+              >
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight leading-none">
+                  <span className="block text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-400">
+                    FUTURE OF
+                  </span>
+                  <span className="block relative mt-2">
+                    <span className="absolute inset-0 blur-2xl bg-gradient-to-r from-emerald-500 to-amber-500 opacity-30" />
+                    <span className="relative text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-green-300 to-amber-400">
+                      COAL MINING
+                    </span>
+                  </span>
+                  <span className="block mt-2 text-3xl sm:text-4xl lg:text-5xl font-light text-zinc-500">
+                    <motion.span
+                      initial={{ width: 0 }}
+                      animate={{ width: "100%" }}
+                      transition={{ duration: 1, delay: 0.8 }}
+                      className="inline-block overflow-hidden whitespace-nowrap"
+                    >
+                      Powered by AI
+                    </motion.span>
+                  </span>
+                </h1>
+              </motion.div>
+
+              {/* Description */}
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.5 }}
+                className="text-lg sm:text-xl text-zinc-400 leading-relaxed max-w-xl"
+              >
+                Transform your mining operations with <span className="text-emerald-400 font-semibold">real-time AI insights</span>,
+                predictive analytics, and intelligent automation. Experience the next generation of mining technology.
+              </motion.p>
+
+              {/* CTA Buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.7 }}
+                className="flex flex-col sm:flex-row items-start gap-4"
+              >
+                <MagneticButton>
+                  <Link
+                    href="/chat"
+                    className="group relative inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-bold rounded-2xl overflow-hidden shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all"
+                  >
+                    <MessageSquare className="h-5 w-5" />
+                    <span className="relative z-10">Start Mining with AI</span>
+                    <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-green-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </Link>
+                </MagneticButton>
+                <Link
+                  href="/dashboard"
+                  className="group inline-flex items-center gap-3 px-8 py-4 border-2 border-zinc-700 text-zinc-300 font-semibold rounded-2xl hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all"
+                >
+                  <Play className="h-5 w-5 text-emerald-400" />
+                  <span>Watch Demo</span>
+                  <ChevronRight className="h-4 w-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                </Link>
+              </motion.div>
+
+              {/* Trust Indicators */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.9 }}
+                className="flex items-center gap-8 pt-4"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="flex -space-x-2">
+                    {[...Array(4)].map((_, i) => (
+                      <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-green-600 border-2 border-zinc-950" />
+                    ))}
+                  </div>
+                  <span className="text-sm text-zinc-500">500+ mines trust us</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                  ))}
+                  <span className="text-sm text-zinc-500 ml-1">4.9/5 rating</span>
+                </div>
+              </motion.div>
+            </motion.div>
+
+            {/* Right Side - Interactive 3D Card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, rotateY: -20 }}
+              animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+              transition={{ duration: 1, delay: 0.4 }}
+              className="relative hidden lg:block"
+            >
+              {/* Holographic Mining Dashboard */}
+              <div className="relative aspect-square w-full max-w-lg mx-auto">
+                {/* Glowing Border */}
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/30 via-green-500/20 to-amber-500/30 rounded-3xl blur-xl" />
+
+                {/* Main Card */}
+                <motion.div
+                  animate={{ rotateY: [0, 5, 0, -5, 0] }}
+                  transition={{ duration: 10, repeat: Infinity }}
+                  className="relative bg-gradient-to-br from-zinc-900/90 to-zinc-950/90 backdrop-blur-2xl border border-emerald-500/20 rounded-3xl p-8 shadow-2xl"
+                >
+                  {/* Circuit Pattern Overlay */}
+                  <div className="absolute inset-0 opacity-5" style={{
+                    backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%2310b981" fill-opacity="1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
+                  }} />
+
+                  {/* Animated Stats */}
+                  <div className="space-y-6">
+                    {/* Header */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center">
+                          <BarChart3 className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-semibold text-zinc-400">Live Mining Data</h3>
+                          <p className="text-xs text-zinc-600">Real-time Analytics</p>
+                        </div>
+                      </div>
+                      <motion.div
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="w-3 h-3 bg-emerald-400 rounded-full"
+                      />
+                    </div>
+
+                    {/* Data Visualization */}
+                    <div className="space-y-4">
+                      {[
+                        { label: 'Production Rate', value: 87, color: 'emerald', icon: Layers },
+                        { label: 'AI Efficiency', value: 94, color: 'green', icon: Zap },
+                        { label: 'Safety Score', value: 99, color: 'amber', icon: Shield },
+                      ].map((item, i) => (
+                        <motion.div
+                          key={item.label}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.6 + i * 0.1 }}
+                          className="space-y-2"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <item.icon className={`h-4 w-4 text-${item.color}-400`} />
+                              <span className="text-sm text-zinc-400">{item.label}</span>
+                            </div>
+                            <div className="text-right">
+                              <span className={`text-lg font-bold text-${item.color}-400`}>{item.value}%</span>
+                            </div>
+                          </div>
+                          <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${item.value}%` }}
+                              transition={{ duration: 1, delay: 0.8 + i * 0.1 }}
+                              className={`h-full bg-gradient-to-r from-${item.color}-500 to-${item.color}-400 rounded-full`}
+                            />
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+
+                    {/* AI Assistant Preview */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 1.2 }}
+                      className="mt-6 p-4 bg-gradient-to-r from-emerald-500/10 to-green-500/10 border border-emerald-500/20 rounded-2xl"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <MessageSquare className="h-4 w-4 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-xs text-emerald-300 font-semibold mb-1">AI Assistant</p>
+                          <p className="text-xs text-zinc-400">
+                            "Production efficiency increased by 23% in Sector-7. Recommend equipment maintenance."
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </div>
+
+                  {/* Floating Elements */}
+                  <motion.div
+                    animate={{ y: [-5, 5, -5], rotate: [0, 5, 0] }}
+                    transition={{ duration: 4, repeat: Infinity }}
+                    className="absolute -top-4 -right-4 w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/50"
+                  >
+                    <Flame className="h-8 w-8 text-white" />
+                  </motion.div>
+                  <motion.div
+                    animate={{ y: [5, -5, 5], rotate: [0, -5, 0] }}
+                    transition={{ duration: 5, repeat: Infinity }}
+                    className="absolute -bottom-4 -left-4 w-16 h-16 bg-gradient-to-br from-emerald-500 to-green-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/50"
+                  >
+                    <Target className="h-8 w-8 text-white" />
+                  </motion.div>
+                </motion.div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
 
         {/* Scroll indicator */}
         <motion.div
@@ -179,8 +398,8 @@ export default function LandingPage() {
           <FadeInUp>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-16">
               <div className="text-center">
-                <div className="text-6xl md:text-8xl font-bold text-white mb-2">
-                  <AnimatedCounter value={500} />+
+                <div className="text-6xl md:text-8xl font-bold text-emerald-400 mb-2">
+                  <AnimatedCounter value={500} />
                 </div>
                 <div className="text-zinc-500 text-lg">Mines Monitored</div>
               </div>
@@ -191,13 +410,13 @@ export default function LandingPage() {
                 <div className="text-zinc-500 text-lg">Accuracy Rate</div>
               </div>
               <div className="text-center">
-                <div className="text-6xl md:text-8xl font-bold text-white mb-2">
-                  <AnimatedCounter value={24} />/7
+                <div className="text-6xl md:text-8xl font-bold text-emerald-400 mb-2">
+                  <AnimatedCounter value={24} />
                 </div>
                 <div className="text-zinc-500 text-lg">Live Monitoring</div>
               </div>
               <div className="text-center">
-                <div className="text-6xl md:text-8xl font-bold text-amber-400 mb-2">
+                <div className="text-6xl md:text-8xl font-bold text-emerald-400 mb-2">
                   <AnimatedCounter value={10} />M+
                 </div>
                 <div className="text-zinc-500 text-lg">Tonnes Tracked</div>
@@ -233,7 +452,7 @@ export default function LandingPage() {
               <ProductionCounter />
             </FadeInUp>
             <FadeInRight delay={0.4}>
-              <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
+              <div className="bg-zinc-900/80 border border-zinc-700/50 rounded-2xl p-6 shadow-2xl backdrop-blur-sm">
                 <div className="flex items-center gap-2 mb-4">
                   <Globe className="h-5 w-5 text-purple-400" />
                   <span className="text-sm font-medium text-zinc-400">Active Regions</span>
