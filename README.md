@@ -69,3 +69,4 @@ MIT License
 # CoalMineAI
 # CoalMineAI
 # CoalMineAI
+# MiningBot
