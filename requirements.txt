@@ -1,22 +1,118 @@
-# MineGPT Backend Dependencies
+# MiningAI Backend Dependencies
 
 # Core Framework
-flask==3.1.0
+flask==3.1.2
 flask-cors==6.0.2
+werkzeug==3.1.5
 
 # PDF Processing & RAG
 pypdf2==3.0.1
 sentence-transformers==5.2.3
 faiss-cpu==1.13.2
 
-# AI/ML
+# AI/ML - Gemini
 google-genai==1.64.0
+google-generativeai==0.8.6
+google-api-core==2.25.2
+google-api-python-client==2.190.0
+google-auth==2.49.0.dev0
+google-auth-httplib2==0.3.0
+google-ai-generativelanguage==0.6.15
+googleapis-common-protos==1.72.0
+grpcio==1.78.0
+grpcio-status==1.71.2
+proto-plus==1.27.1
+protobuf==5.29.6
+
+# Machine Learning
 scikit-learn==1.8.0
 numpy==2.4.2
+scipy==1.17.0
 
-# NLP (optional but recommended)
+# NLP & Transformers
 transformers==5.2.0
 torch==2.10.0
+tokenizers==0.22.2
+huggingface_hub==1.4.1
+safetensors==0.7.0
+
+# Web Search (optional)
+duckduckgo_search==8.1.1
+
+# HTTP & Networking
+requests==2.32.5
+urllib3==2.6.3
+httpx==0.28.1
+httpcore==1.0.9
+httplib2==0.31.2
+h11==0.16.0
+aiohttp==3.13.3
+aiohappyeyeballs==2.6.1
+aiosignal==1.4.0
+frozenlist==1.8.0
+multidict==6.7.1
+propcache==0.4.1
+yarl==1.22.0
+websockets==15.0.1
+anyio==4.12.1
+sniffio==1.3.1
 
 # Utilities
 python-dotenv==1.0.0
+tqdm==4.67.3
+click==8.3.1
+rich==14.3.2
+pyyaml==6.0.3
+filelock==3.24.2
+fsspec==2026.2.0
+packaging==26.0
+joblib==1.5.3
+threadpoolctl==3.6.0
+tenacity==9.1.4
+
+# Data Validation
+pydantic==2.12.5
+pydantic_core==2.41.5
+annotated-types==0.7.0
+typing_extensions==4.15.0
+typing-inspection==0.4.2
+
+# Security & Crypto
+cryptography==46.0.5
+certifi==2026.1.4
+pyasn1==0.6.2
+pyasn1_modules==0.4.2
+cffi==2.0.0
+pycparser==3.0
+
+# Text Processing
+regex==2026.1.15
+markdown-it-py==4.0.0
+mdurl==0.1.2
+pygments==2.19.2
+lxml==6.0.2
+
+# Template Engine
+jinja2==3.1.6
+markupsafe==3.0.3
+
+# CLI Tools
+typer==0.24.0
+typer-slim==0.24.0
+shellingham==1.5.4
+
+# Other Dependencies
+attrs==25.4.0
+blinker==1.9.0
+charset-normalizer==3.4.4
+distro==1.9.0
+idna==3.11
+itsdangerous==2.2.0
+networkx==3.6.1
+pyparsing==3.3.2
+sympy==1.14.0
+mpmath==1.3.0
+uritemplate==4.2.0
+primp==1.0.0
+annotated-doc==0.0.4
+hf-xet==1.2.0
