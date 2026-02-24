@@ -54,12 +54,12 @@ export default function ChatInput({
         <motion.div
           animate={{
             boxShadow: isFocused
-              ? "0 0 0 2px rgba(16, 185, 129, 0.2), 0 4px 20px rgba(0, 0, 0, 0.3)"
-              : "0 2px 10px rgba(0, 0, 0, 0.2)",
+              ? "0 0 0 2px rgba(16, 185, 129, 0.2), 0 4px 20px rgba(0, 0, 0, 0.05)"
+              : "0 2px 10px rgba(0, 0, 0, 0.05)",
           }}
           className={`relative flex items-end gap-2 p-2 rounded-2xl border transition-colors ${isFocused
-            ? "bg-zinc-900 light:bg-zinc-50 border-emerald-500/50"
-            : "bg-zinc-900/80 light:bg-zinc-50/80 border-zinc-800 light:border-zinc-300 hover:border-zinc-700 light:hover:border-zinc-400"
+            ? "bg-white border-emerald-500/50"
+            : "bg-white border-zinc-300 hover:border-zinc-400"
             }`}
         >
           {/* Attachment button */}
@@ -67,7 +67,7 @@ export default function ChatInput({
             type="button"
             onClick={onFileUpload}
             disabled={disabled}
-            className="shrink-0 p-2.5 rounded-xl text-zinc-500 light:text-zinc-600 hover:text-emerald-400 hover:bg-zinc-800 light:hover:bg-zinc-200 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-zinc-500 transition-all"
+            className="shrink-0 p-2.5 rounded-xl text-zinc-600 hover:text-emerald-500 hover:bg-zinc-100 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-zinc-600 transition-all"
             title="Attach file"
           >
             <Paperclip className="h-5 w-5" />
@@ -85,7 +85,7 @@ export default function ChatInput({
               placeholder="Ask about coal mining, safety, production..."
               disabled={disabled}
               rows={1}
-              className="w-full resize-none bg-transparent px-2 py-2 text-[15px] text-zinc-100 light:text-zinc-900 placeholder-zinc-500 light:placeholder-zinc-400 focus:outline-none disabled:opacity-50 max-h-[200px] transition-colors duration-300"
+              className="w-full resize-none bg-transparent px-2 py-2 text-[15px] text-zinc-900 placeholder-zinc-500 focus:outline-none disabled:opacity-50 max-h-[200px]"
             />
           </div>
 
@@ -100,8 +100,8 @@ export default function ChatInput({
               whileTap={{ scale: 0.95 }}
               className={`relative p-2.5 rounded-xl transition-all ${isRecording
                 ? "bg-red-500 text-white shadow-lg shadow-red-500/50"
-                : "text-zinc-500 light:text-zinc-600 hover:text-emerald-400 hover:bg-zinc-800 light:hover:bg-zinc-200"
-                } disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-zinc-500`}
+                : "text-zinc-600 hover:text-emerald-500 hover:bg-zinc-100"
+                } disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-zinc-600`}
               title={isRecording ? "Stop recording" : "Voice input"}
             >
               <AnimatePresence mode="wait">
@@ -144,7 +144,7 @@ export default function ChatInput({
               whileTap={{ scale: 0.95 }}
               className={`p-2.5 rounded-xl transition-all ${input.trim() && !disabled
                 ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40"
-                : "bg-zinc-800 light:bg-zinc-300 text-zinc-600 light:text-zinc-400 cursor-not-allowed"
+                : "bg-zinc-200 text-zinc-400 cursor-not-allowed"
                 }`}
               title="Send message"
             >

@@ -60,9 +60,9 @@ export default function Sidebar({
   }, {} as Record<string, ChatHistory[]>);
 
   return (
-    <div className="flex h-full w-72 flex-col bg-zinc-900/50 border-r border-zinc-800/50 backdrop-blur-xl">
+    <div className="flex h-full w-72 flex-col bg-white border-r border-zinc-200">
       {/* Logo */}
-      <div className="flex items-center justify-between px-5 py-5 border-b border-zinc-800/50">
+      <div className="flex items-center justify-between px-5 py-5">
         <Link href="/chat" className="flex items-center gap-3 group">
           <div className="relative">
             <div className="absolute inset-0 bg-emerald-500/20 rounded-xl blur-lg group-hover:blur-xl transition-all" />
@@ -71,13 +71,13 @@ export default function Sidebar({
             </div>
           </div>
           <div>
-            <span className="text-lg font-bold text-white">Mine</span>
-            <span className="text-lg font-light text-emerald-400">GPT</span>
+            <span className="text-lg font-bold text-zinc-900">Mining</span>
+            <span className="text-lg font-light text-emerald-500">AI</span>
           </div>
         </Link>
         <Link
           href="/chat"
-          className="p-2 rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-800 transition-all"
+          className="p-2 rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-all"
           title="Back to chat"
         >
           <Home className="h-4 w-4" />
@@ -107,7 +107,7 @@ export default function Sidebar({
               animate={{ opacity: 1 }}
               className="mb-4"
             >
-              <p className="px-2 py-2 text-xs font-semibold text-zinc-600 uppercase tracking-wider">
+              <p className="px-2 py-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
                 {date}
               </p>
               <div className="space-y-1">
@@ -118,14 +118,14 @@ export default function Sidebar({
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
                     className={`group flex items-center gap-3 rounded-xl px-3 py-3 cursor-pointer transition-all duration-200 ${currentChatId === chat.id
-                      ? "bg-emerald-500/10 border border-emerald-500/20 text-white"
-                      : "text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200"
+                      ? "bg-emerald-500/10 border border-emerald-500/20 text-zinc-900"
+                      : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
                       }`}
                     onClick={() => onSelectChat(chat.id)}
                   >
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${currentChatId === chat.id
-                      ? "bg-emerald-500/20 text-emerald-400"
-                      : "bg-zinc-800/50 text-zinc-500"
+                      ? "bg-emerald-500/20 text-emerald-500"
+                      : "bg-zinc-100 text-zinc-500"
                       }`}>
                       <MessageSquare className="h-4 w-4" />
                     </div>
@@ -137,7 +137,7 @@ export default function Sidebar({
                         e.stopPropagation();
                         onDeleteChat(chat.id);
                       }}
-                      className="opacity-0 group-hover:opacity-100 p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition-all rounded-lg"
+                      className="opacity-0 group-hover:opacity-100 p-1.5 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-lg"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -149,21 +149,21 @@ export default function Sidebar({
         </AnimatePresence>
 
         {chatHistory.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 text-zinc-600">
-            <div className="w-16 h-16 rounded-2xl bg-zinc-800/50 flex items-center justify-center mb-4">
+          <div className="flex flex-col items-center justify-center py-16 text-zinc-500">
+            <div className="w-16 h-16 rounded-2xl bg-zinc-100 flex items-center justify-center mb-4">
               <MessageSquare className="h-8 w-8 opacity-50" />
             </div>
             <p className="text-sm text-center font-medium">No conversations yet</p>
-            <p className="text-xs mt-1 text-zinc-700">Start a new chat to begin</p>
+            <p className="text-xs mt-1 text-zinc-400">Start a new chat to begin</p>
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-4 border-t border-zinc-800/50">
-        <div className="flex items-center gap-2 text-xs text-zinc-600">
-          <Sparkles className="h-3 w-3 text-emerald-500/50" />
-          <span>MineGPT</span>
+      <div className="px-4 py-4">
+        <div className="flex items-center gap-2 text-xs text-zinc-500">
+          <Sparkles className="h-3 w-3 text-emerald-500" />
+          <span>MiningAI</span>
         </div>
       </div>
     </div>

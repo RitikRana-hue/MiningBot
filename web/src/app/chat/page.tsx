@@ -322,7 +322,7 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen bg-zinc-950 overflow-hidden flex">
+    <div className="h-screen bg-white overflow-hidden flex">
       {/* Sidebar */}
       <Sidebar
         onNewChat={handleNewChat}
@@ -335,11 +335,11 @@ export default function Home() {
       />
 
       {/* Main Chat Area */}
-      <div className="flex flex-1 flex-col bg-zinc-950">
+      <div className="flex flex-1 flex-col bg-white">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-sm">
+        <div className="flex items-center justify-between px-6 py-4 bg-white/80 backdrop-blur-sm">
           <div className="flex items-center gap-4">
-            <h2 className="text-sm font-medium text-zinc-300">
+            <h2 className="text-sm font-medium text-zinc-700">
               {currentChatId
                 ? chatHistory.find((c) => c.id === currentChatId)?.title || "Chat"
                 : "New Chat"}
@@ -351,7 +351,7 @@ export default function Home() {
               onClick={() => setShowFileUpload(!showFileUpload)}
               className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${showFileUpload
                 ? "bg-emerald-600 text-white"
-                : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                : "bg-white border border-zinc-300 text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
                 }`}
             >
               {showFileUpload ? <X className="h-4 w-4" /> : <Upload className="h-4 w-4" />}
@@ -375,9 +375,9 @@ export default function Home() {
         </AnimatePresence>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto bg-white scrollbar-hide">
           {messages.length === 0 ? (
-            <div className="flex h-full flex-col items-center justify-center text-zinc-400 px-4">
+            <div className="flex h-full flex-col items-center justify-center text-zinc-600 px-4">
               {/* Hero section for empty state */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -395,10 +395,10 @@ export default function Home() {
                   </div>
                 </div>
 
-                <h1 className="text-3xl font-bold text-white mb-3">
-                  MineGPT
+                <h1 className="text-3xl font-bold text-zinc-900 mb-3">
+                  MiningAI
                 </h1>
-                <p className="text-zinc-400 mb-8">
+                <p className="text-zinc-600 mb-8">
                   Ask me anything about coal mining operations, safety protocols,
                   production analysis, and more!
                 </p>
@@ -417,12 +417,12 @@ export default function Home() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.1 }}
                       onClick={() => handleSend(item.text)}
-                      className="group flex items-center gap-3 p-4 rounded-2xl border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800/80 hover:border-zinc-700 text-left transition-all"
+                      className="group flex items-center gap-3 p-4 rounded-2xl border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 hover:border-zinc-300 text-left transition-all"
                     >
-                      <div className={`w-10 h-10 rounded-xl bg-${item.color}-500/10 flex items-center justify-center text-${item.color}-400 group-hover:scale-110 transition-transform`}>
+                      <div className={`w-10 h-10 rounded-xl bg-${item.color}-500/10 flex items-center justify-center text-${item.color}-500 group-hover:scale-110 transition-transform`}>
                         {item.icon}
                       </div>
-                      <span className="text-zinc-300 group-hover:text-white transition-colors">
+                      <span className="text-zinc-700 group-hover:text-zinc-900 transition-colors">
                         {item.text}
                       </span>
                     </motion.button>
@@ -443,7 +443,7 @@ export default function Home() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="py-6 bg-zinc-900/50"
+                  className="py-6 bg-zinc-50"
                 >
                   <div className="mx-auto max-w-3xl px-4 flex gap-4">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600">
@@ -477,7 +477,7 @@ export default function Home() {
         </div>
 
         {/* Input */}
-        <div className="border-t border-zinc-800/50 bg-zinc-950">
+        <div className="bg-white">
           {/* Voice status indicator */}
           <AnimatePresence>
             {(isRecording || isSpeaking) && (
@@ -485,7 +485,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
-                className="px-6 py-3 border-b border-zinc-800/50"
+                className="px-6 py-3"
               >
                 <div className="max-w-3xl mx-auto flex items-center gap-3">
                   {isRecording && (
@@ -495,7 +495,7 @@ export default function Home() {
                         transition={{ duration: 1, repeat: Infinity }}
                         className="w-3 h-3 rounded-full bg-red-500"
                       />
-                      <span className="text-sm text-zinc-400">
+                      <span className="text-sm text-zinc-600">
                         Listening... Speak now
                       </span>
                     </>
@@ -503,12 +503,12 @@ export default function Home() {
                   {isSpeaking && (
                     <>
                       <Volume2 className="h-4 w-4 text-emerald-500" />
-                      <span className="text-sm text-zinc-400">
+                      <span className="text-sm text-zinc-600">
                         Speaking response...
                       </span>
                       <button
                         onClick={stopSpeaking}
-                        className="ml-auto text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+                        className="ml-auto text-xs text-zinc-500 hover:text-zinc-700 transition-colors"
                       >
                         Stop
                       </button>
