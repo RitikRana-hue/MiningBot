@@ -6,20 +6,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  tokens: number;
-  plan: "free" | "professional" | "enterprise";
   createdAt: number;
-  paymentHistory?: string[];
-  lastUpgradeDate?: number;
-}
-
-export interface PaymentHistoryEntry {
-  orderId: string;
-  planType: string;
-  amount: number;
-  paymentMethod: string;
-  status: string;
-  timestamp: number;
 }
 
 interface AuthContextType {
@@ -28,27 +15,19 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signup: (email: string, password: string, name: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
-  deductTokens: (amount: number) => boolean;
-  addTokens: (amount: number) => void;
-  updatePlan: (plan: "free" | "professional" | "enterprise") => void;
-  upgradePlanWithPayment: (orderId: string, planType: "free" | "professional" | "enterprise", amount: number, paymentMethod: string) => void;
-  getPaymentHistory: () => PaymentHistoryEntry[];
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const STORAGE_KEY = "coalmine-auth";
-const USERS_KEY = "coalmine-users";
-const FREE_TOKENS = 100;
+const STORAGE_KEY = "minegpt-auth";
+const USERS_KEY = "minegpt-users";
 
 // Initialize demo account
 const DEMO_USER: User & { password: string } = {
   id: "demo-user-001",
-  email: "demo@coalmineai.com",
+  email: "demo@minegpt.com",
   password: "demo123",
   name: "Demo User",
-  tokens: 5000,
-  plan: "professional",
   createdAt: Date.now(),
 };
 
@@ -124,8 +103,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password,
       name,
-      tokens: FREE_TOKENS,
-      plan: "free",
       createdAt: Date.now(),
     };
 
@@ -142,72 +119,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(STORAGE_KEY);
   };
 
-  const deductTokens = (amount: number): boolean => {
-    if (!user) return false;
-    
-    // Enterprise users have unlimited tokens
-    if (user.plan === "enterprise") return true;
-    
-    if (user.tokens < amount) return false;
-
-    setUser((prev) => prev ? { ...prev, tokens: prev.tokens - amount } : null);
-    return true;
-  };
-
-  const addTokens = (amount: number) => {
-    if (!user) return;
-    setUser((prev) => prev ? { ...prev, tokens: prev.tokens + amount } : null);
-  };
-
-  const updatePlan = (plan: "free" | "professional" | "enterprise") => {
-    if (!user) return;
-    
-    // Add tokens based on plan upgrade
-    let bonusTokens = 0;
-    if (plan === "professional") bonusTokens = 5000;
-    if (plan === "enterprise") bonusTokens = 0; // Unlimited
-
-    setUser((prev) => prev ? { ...prev, plan, tokens: prev.tokens + bonusTokens } : null);
-  };
-
-  const upgradePlanWithPayment = (orderId: string, planType: "free" | "professional" | "enterprise", amount: number, paymentMethod: string) => {
-    if (!user) return;
-    
-    // Update plan
-    let bonusTokens = 0;
-    if (planType === "professional") bonusTokens = 5000;
-    if (planType === "enterprise") bonusTokens = 0; // Unlimited
-
-    // Add to payment history
-    const paymentEntry: PaymentHistoryEntry = {
-      orderId,
-      planType,
-      amount,
-      paymentMethod,
-      status: "completed",
-      timestamp: Date.now(),
-    };
-
-    setUser((prev) => {
-      if (!prev) return null;
-      const history = prev.paymentHistory || [];
-      return {
-        ...prev,
-        plan: planType,
-        tokens: planType === "enterprise" ? prev.tokens : prev.tokens + bonusTokens,
-        paymentHistory: [...history, orderId],
-        lastUpgradeDate: Date.now(),
-      };
-    });
-  };
-
-  const getPaymentHistory = (): PaymentHistoryEntry[] => {
-    if (!user || !user.paymentHistory) return [];
-    // In a real app, you'd fetch from database
-    // For now, return empty array as we store in PaymentContext
-    return [];
-  };
-
   return (
     <AuthContext.Provider
       value={{
@@ -216,11 +127,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         signup,
         logout,
-        deductTokens,
-        addTokens,
-        updatePlan,
-        upgradePlanWithPayment,
-        getPaymentHistory,
       }}
     >
       {children}

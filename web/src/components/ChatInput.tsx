@@ -1,17 +1,26 @@
 "use client";
 
-import { SendHorizontal, Paperclip, Mic, Sparkles } from "lucide-react";
+import { SendHorizontal, Paperclip, Mic, MicOff } from "lucide-react";
 import { FormEvent, useState, useRef, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ChatInputProps {
   onSend: (message: string) => void;
   disabled?: boolean;
   onFileUpload?: () => void;
-  onVoiceRecord?: () => void;
+  isRecording?: boolean;
+  onStartRecording?: () => void;
+  onStopRecording?: () => void;
 }
 
-export default function ChatInput({ onSend, disabled, onFileUpload, onVoiceRecord }: ChatInputProps) {
+export default function ChatInput({
+  onSend,
+  disabled,
+  onFileUpload,
+  isRecording = false,
+  onStartRecording,
+  onStopRecording
+}: ChatInputProps) {
   const [input, setInput] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -48,18 +57,17 @@ export default function ChatInput({ onSend, disabled, onFileUpload, onVoiceRecor
               ? "0 0 0 2px rgba(16, 185, 129, 0.2), 0 4px 20px rgba(0, 0, 0, 0.3)"
               : "0 2px 10px rgba(0, 0, 0, 0.2)",
           }}
-          className={`relative flex items-end gap-2 p-2 rounded-2xl border transition-colors ${
-            isFocused
-              ? "bg-zinc-900 border-emerald-500/50"
-              : "bg-zinc-900/80 border-zinc-800 hover:border-zinc-700"
-          }`}
+          className={`relative flex items-end gap-2 p-2 rounded-2xl border transition-colors ${isFocused
+            ? "bg-zinc-900 light:bg-zinc-50 border-emerald-500/50"
+            : "bg-zinc-900/80 light:bg-zinc-50/80 border-zinc-800 light:border-zinc-300 hover:border-zinc-700 light:hover:border-zinc-400"
+            }`}
         >
           {/* Attachment button */}
           <button
             type="button"
             onClick={onFileUpload}
             disabled={disabled}
-            className="shrink-0 p-2.5 rounded-xl text-zinc-500 hover:text-emerald-400 hover:bg-zinc-800 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-zinc-500 transition-all"
+            className="shrink-0 p-2.5 rounded-xl text-zinc-500 light:text-zinc-600 hover:text-emerald-400 hover:bg-zinc-800 light:hover:bg-zinc-200 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-zinc-500 transition-all"
             title="Attach file"
           >
             <Paperclip className="h-5 w-5" />
@@ -77,22 +85,56 @@ export default function ChatInput({ onSend, disabled, onFileUpload, onVoiceRecor
               placeholder="Ask about coal mining, safety, production..."
               disabled={disabled}
               rows={1}
-              className="w-full resize-none bg-transparent px-2 py-2 text-[15px] text-zinc-100 placeholder-zinc-500 focus:outline-none disabled:opacity-50 max-h-[200px]"
+              className="w-full resize-none bg-transparent px-2 py-2 text-[15px] text-zinc-100 light:text-zinc-900 placeholder-zinc-500 light:placeholder-zinc-400 focus:outline-none disabled:opacity-50 max-h-[200px] transition-colors duration-300"
             />
           </div>
 
           {/* Action buttons */}
           <div className="flex items-center gap-1 shrink-0">
             {/* Voice button */}
-            <button
+            <motion.button
               type="button"
-              onClick={onVoiceRecord}
+              onClick={isRecording ? onStopRecording : onStartRecording}
               disabled={disabled}
-              className="p-2.5 rounded-xl text-zinc-500 hover:text-emerald-400 hover:bg-zinc-800 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-zinc-500 transition-all"
-              title="Voice input"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`relative p-2.5 rounded-xl transition-all ${isRecording
+                ? "bg-red-500 text-white shadow-lg shadow-red-500/50"
+                : "text-zinc-500 light:text-zinc-600 hover:text-emerald-400 hover:bg-zinc-800 light:hover:bg-zinc-200"
+                } disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-zinc-500`}
+              title={isRecording ? "Stop recording" : "Voice input"}
             >
-              <Mic className="h-5 w-5" />
-            </button>
+              <AnimatePresence mode="wait">
+                {isRecording ? (
+                  <motion.div
+                    key="recording"
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    exit={{ scale: 0, rotate: 180 }}
+                  >
+                    <MicOff className="h-5 w-5" />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="idle"
+                    initial={{ scale: 0, rotate: 180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    exit={{ scale: 0, rotate: -180 }}
+                  >
+                    <Mic className="h-5 w-5" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Recording pulse animation */}
+              {isRecording && (
+                <motion.div
+                  className="absolute inset-0 rounded-xl bg-red-500"
+                  animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                />
+              )}
+            </motion.button>
 
             {/* Send button */}
             <motion.button
@@ -100,23 +142,16 @@ export default function ChatInput({ onSend, disabled, onFileUpload, onVoiceRecor
               disabled={!input.trim() || disabled}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className={`p-2.5 rounded-xl transition-all ${
-                input.trim() && !disabled
-                  ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40"
-                  : "bg-zinc-800 text-zinc-600 cursor-not-allowed"
-              }`}
+              className={`p-2.5 rounded-xl transition-all ${input.trim() && !disabled
+                ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40"
+                : "bg-zinc-800 light:bg-zinc-300 text-zinc-600 light:text-zinc-400 cursor-not-allowed"
+                }`}
               title="Send message"
             >
               <SendHorizontal className="h-5 w-5" />
             </motion.button>
           </div>
         </motion.div>
-
-        {/* Footer info */}
-        <div className="mt-3 flex items-center justify-center gap-2 text-xs text-zinc-600">
-          <Sparkles className="h-3 w-3 text-emerald-500/50" />
-          <span>AI-powered mining assistant • Press Enter to send, Shift+Enter for new line</span>
-        </div>
       </form>
     </div>
   );

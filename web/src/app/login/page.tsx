@@ -28,7 +28,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  
+
   const { login, signup } = useAuth();
   const router = useRouter();
 
@@ -67,7 +67,7 @@ export default function LoginPage() {
 
   const benefits = [
     { icon: <Coins className="h-5 w-5" />, text: "100 free tokens on signup" },
-    { icon: <Sparkles className="h-5 w-5" />, text: "AI-powered mining assistant" },
+    { icon: <Sparkles className="h-5 w-5" />, text: "MineGPT" },
     { icon: <Shield className="h-5 w-5" />, text: "Secure & private conversations" },
     { icon: <Zap className="h-5 w-5" />, text: "Instant responses 24/7" },
   ];
@@ -94,8 +94,8 @@ export default function LoginPage() {
           <Link href="/" className="flex items-center gap-3 mb-12">
             <HardHat className="h-12 w-12 text-emerald-500" />
             <div>
-              <span className="text-3xl font-bold tracking-tight">CoalMine</span>
-              <span className="text-3xl font-light text-emerald-400">AI</span>
+              <span className="text-3xl font-bold tracking-tight">Mine</span>
+              <span className="text-3xl font-light text-emerald-400">GPT</span>
             </div>
           </Link>
 
@@ -103,7 +103,7 @@ export default function LoginPage() {
             Welcome to the Future of
             <span className="text-emerald-400"> Mining Intelligence</span>
           </h1>
-          
+
           <p className="text-xl text-zinc-400 mb-10">
             Get instant access to AI-powered mining insights, safety protocols, and operational analytics.
           </p>
@@ -147,8 +147,8 @@ export default function LoginPage() {
           <div className="lg:hidden flex items-center gap-3 mb-8">
             <HardHat className="h-10 w-10 text-emerald-500" />
             <div>
-              <span className="text-2xl font-bold tracking-tight">CoalMine</span>
-              <span className="text-2xl font-light text-emerald-400">AI</span>
+              <span className="text-2xl font-bold tracking-tight">Mine</span>
+              <span className="text-2xl font-light text-emerald-400">GPT</span>
             </div>
           </div>
 
@@ -158,17 +158,15 @@ export default function LoginPage() {
             <div className="flex bg-zinc-800 rounded-xl p-1 mb-8">
               <button
                 onClick={() => { setIsLogin(true); setError(""); }}
-                className={`flex-1 py-3 rounded-lg text-sm font-medium transition-colors ${
-                  isLogin ? "bg-emerald-600 text-white" : "text-zinc-400 hover:text-white"
-                }`}
+                className={`flex-1 py-3 rounded-lg text-sm font-medium transition-colors ${isLogin ? "bg-emerald-600 text-white" : "text-zinc-400 hover:text-white"
+                  }`}
               >
                 Login
               </button>
               <button
                 onClick={() => { setIsLogin(false); setError(""); }}
-                className={`flex-1 py-3 rounded-lg text-sm font-medium transition-colors ${
-                  !isLogin ? "bg-emerald-600 text-white" : "text-zinc-400 hover:text-white"
-                }`}
+                className={`flex-1 py-3 rounded-lg text-sm font-medium transition-colors ${!isLogin ? "bg-emerald-600 text-white" : "text-zinc-400 hover:text-white"
+                  }`}
               >
                 Sign Up
               </button>

@@ -4,8 +4,6 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Navigation from "@/components/Navigation";
-import PaymentModal from "@/components/PaymentModal";
-import { useAuth } from "@/context/AuthContext";
 import { Check, X, Zap, Rocket, Crown, ChevronDown, Shield, BarChart3, Clock, Users, MessageSquare, Star, Quote } from "lucide-react";
 
 const plans = [
@@ -70,7 +68,7 @@ const testimonials = [
     company: "Coal India Ltd",
     image: "RK",
     rating: 5,
-    text: "CoalMineAI has transformed how we monitor our operations. The AI insights have helped us increase efficiency by 35% in just 3 months."
+    text: "MineGPT has transformed how we monitor our operations. The AI insights have helped us increase efficiency by 35% in just 3 months."
   },
   {
     name: "Priya Sharma",
@@ -78,7 +76,7 @@ const testimonials = [
     company: "Adani Mining",
     image: "PS",
     rating: 5,
-    text: "The real-time safety monitoring is incredible. We've reduced incidents by 60% and the team loves the intuitive interface."
+    text: "The real-time safety monitoring is incredible. We've reduced incidents by 60% and team loves the intuitive interface."
   },
   {
     name: "Amit Patel",
@@ -113,7 +111,7 @@ const faqs = [
   },
   {
     question: "Can I cancel anytime?",
-    answer: "Yes, you can cancel your subscription at any time. No questions asked, no cancellation fees. Your data remains accessible until the end of your billing period."
+    answer: "Yes, you can cancel your subscription at any time. No questions asked, no cancellation fees. Your data remains accessible until end of your billing period."
   },
 ];
 
@@ -129,46 +127,18 @@ const comparisons = [
 ];
 
 export default function PricingPage() {
-  const [paymentModal, setPaymentModal] = useState<{
-    isOpen: boolean;
-    plan: { name: string; type: "free" | "professional" | "enterprise"; price: number } | null;
-  }>({ isOpen: false, plan: null });
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const { user } = useAuth();
   const router = useRouter();
 
   const handleBuyPlan = (planName: string, planType: "free" | "professional" | "enterprise", price: number) => {
-    if (!user) {
-      router.push("/login");
-      return;
-    }
-
-    if (user.plan === planType) {
-      alert(`You are already on the ${planName} plan`);
-      return;
-    }
-
-    if (planType === "free") {
-      router.push("/chat");
-      return;
-    }
-
-    if (planType === "enterprise") {
-      router.push("/contact");
-      return;
-    }
-
-    setPaymentModal({ isOpen: true, plan: { name: planName, type: planType, price } });
-  };
-
-  const handlePaymentSuccess = (orderId: string) => {
+    // Since we're chat-only, redirect to chat for all plans
     router.push("/chat");
   };
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <Navigation />
-      
+
       {/* Hero */}
       <section className="pt-32 pb-16">
         <div className="max-w-7xl mx-auto px-4 text-center">
@@ -194,9 +164,8 @@ export default function PricingPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
                 whileHover={{ y: -5 }}
-                className={`relative bg-zinc-900 border-2 rounded-3xl p-8 h-full flex flex-col ${
-                  plan.popular ? "border-emerald-500" : "border-zinc-800"
-                }`}
+                className={`relative bg-zinc-900 border-2 rounded-3xl p-8 h-full flex flex-col ${plan.popular ? "border-emerald-500" : "border-zinc-800"
+                  }`}
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-emerald-500 text-white text-sm font-semibold rounded-full">
@@ -205,9 +174,8 @@ export default function PricingPage() {
                 )}
 
                 <div className="flex items-center gap-3 mb-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                    plan.popular ? "bg-emerald-500/20 text-emerald-400" : "bg-zinc-800 text-zinc-400"
-                  }`}>
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${plan.popular ? "bg-emerald-500/20 text-emerald-400" : "bg-zinc-800 text-zinc-400"
+                    }`}>
                     {plan.icon}
                   </div>
                   <h3 className="text-2xl font-bold">{plan.name}</h3>
@@ -241,11 +209,10 @@ export default function PricingPage() {
 
                 <button
                   onClick={() => handleBuyPlan(plan.name, plan.type, plan.price)}
-                  className={`w-full py-4 rounded-full font-semibold transition-colors ${
-                    plan.popular
+                  className={`w-full py-4 rounded-full font-semibold transition-colors ${plan.popular
                       ? "bg-emerald-600 text-white hover:bg-emerald-500"
                       : "bg-zinc-800 text-white hover:bg-zinc-700"
-                  }`}
+                    }`}
                 >
                   {plan.type === "enterprise" ? "Contact Sales" : "Get Started"}
                 </button>
@@ -419,32 +386,22 @@ export default function PricingPage() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
-                onClick={() => handleBuyPlan("Professional", "professional", 49999)}
+                onClick={() => router.push("/chat")}
                 className="px-8 py-4 bg-emerald-600 text-white font-bold rounded-full hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-500/25"
               >
-                Start Free Trial
+                Start Using Chat
               </button>
               <button
-                onClick={() => router.push("/contact")}
+                onClick={() => router.push("/chat")}
                 className="px-8 py-4 border-2 border-zinc-700 text-zinc-300 font-semibold rounded-full hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all"
               >
-                Talk to Sales
+                Try Demo
               </button>
             </div>
-            <p className="text-sm text-zinc-500 mt-6">No credit card required • 14-day free trial • Cancel anytime</p>
+            <p className="text-sm text-zinc-500 mt-6">Free to use • No registration required • Start immediately</p>
           </motion.div>
         </div>
       </section>
-
-      {/* Payment Modal */}
-      <PaymentModal
-        isOpen={paymentModal.isOpen}
-        onClose={() => setPaymentModal({ isOpen: false, plan: null })}
-        planType={paymentModal.plan?.type || "free"}
-        planName={paymentModal.plan?.name || ""}
-        amount={paymentModal.plan?.price || 0}
-        onSuccess={handlePaymentSuccess}
-      />
     </div>
   );
 }

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        .container {
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #10b981;
+            margin-bottom: 30px;
+        }
+
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #333;
+            border-radius: 8px;
+        }
+
+        button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+
+        button:hover {
+            background: #059669;
+        }
+
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        .recording {
+            background: #ef4444 !important;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .status {
+            margin: 15px 0;
+            padding: 10px;
+            background: #444;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .success {
+            color: #10b981;
+        }
+
+        .error {
+            color: #ef4444;
+        }
+
+        .info {
+            color: #3b82f6;
+        }
+
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #1a1a1a;
+            border-radius: 4px;
+            border-left: 4px solid #10b981;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎤 Voice API Browser Test</h1>
+
+        <!-- Browser Support Check -->
+        <div class="test-section">
+            <h2>1. Browser Support Check</h2>
+            <button onclick="checkSupport()">Check Support</button>
+            <div id="support-status" class="status"></div>
+        </div>
+
+        <!-- Microphone Test -->
+        <div class="test-section">
+            <h2>2. Microphone Access Test</h2>
+            <button onclick="testMicrophone()">Test Microphone</button>
+            <div id="mic-status" class="status"></div>
+        </div>
+
+        <!-- Speech Recognition Test -->
+        <div class="test-section">
+            <h2>3. Speech Recognition Test</h2>
+            <button id="record-btn" onclick="toggleRecording()">Start Recording</button>
+            <div id="recognition-status" class="status"></div>
+            <div id="transcript-result" class="result" style="display:none;"></div>
+        </div>
+
+        <!-- Speech Synthesis Test -->
+        <div class="test-section">
+            <h2>4. Speech Synthesis Test (Audio Output)</h2>
+            <button onclick="testSpeech()">Test Audio Output</button>
+            <button onclick="stopSpeech()">Stop Audio</button>
+            <div id="speech-status" class="status"></div>
+        </div>
+
+        <!-- Full Test -->
+        <div class="test-section">
+            <h2>5. Full Voice Interaction Test</h2>
+            <p>This will record your voice and speak it back to you.</p>
+            <button id="full-test-btn" onclick="fullTest()">Start Full Test</button>
+            <div id="full-test-status" class="status"></div>
+        </div>
+    </div>
+
+    <script>
+        let recognition = null;
+        let isRecording = false;
+
+        // 1. Check Browser Support
+        function checkSupport() {
+            const status = document.getElementById('support-status');
+            const results = [];
+
+            // Check Speech Recognition
+            const hasRecognition = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
+            results.push(`Speech Recognition: ${hasRecognition ? '✅ Supported' : '❌ Not Supported'}`);
+
+            // Check Speech Synthesis
+            const hasSynthesis = 'speechSynthesis' in window;
+            results.push(`Speech Synthesis: ${hasSynthesis ? '✅ Supported' : '❌ Not Supported'}`);
+
+            // Check MediaDevices
+            const hasMedia = 'mediaDevices' in navigator;
+            results.push(`Media Devices API: ${hasMedia ? '✅ Supported' : '❌ Not Supported'}`);
+
+            // Browser info
+            results.push(`Browser: ${navigator.userAgent.split(' ').pop()}`);
+
+            status.innerHTML = results.map(r =>
+                `<div class="${r.includes('✅') ? 'success' : 'error'}">${r}</div>`
+            ).join('');
+
+            if (!hasRecognition) {
+                status.innerHTML += '<div class="error">⚠️ Your browser does not support Speech Recognition. Please use Chrome, Edge, or Safari.</div>';
+            }
+        }
+
+        // 2. Test Microphone Access
+        async function testMicrophone() {
+            const status = document.getElementById('mic-status');
+            status.innerHTML = '<div class="info">Testing microphone access...</div>';
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                // Get microphone info
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const mics = devices.filter(d => d.kind === 'audioinput');
+
+                status.innerHTML = `
+                    <div class="success">✅ Microphone access granted!</div>
+                    <div class="info">Found ${mics.length} microphone(s):</div>
+                    ${mics.map(m => `<div>• ${m.label || 'Microphone ' + m.deviceId.substr(0, 8)}</div>`).join('')}
+                `;
+
+                // Stop the stream
+                stream.getTracks().forEach(track => track.stop());
+            } catch (err) {
+                status.innerHTML = `
+                    <div class="error">❌ Microphone access denied or error:</div>
+                    <div class="error">${err.message}</div>
+                    <div class="info">Please grant microphone permission and try again.</div>
+                `;
+            }
+        }
+
+        // 3. Test Speech Recognition
+        function toggleRecording() {
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        }
+
+        function startRecording() {
+            const status = document.getElementById('recognition-status');
+            const btn = document.getElementById('record-btn');
+            const result = document.getElementById('transcript-result');
+
+            try {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.lang = 'en-US';
+                recognition.continuous = false;
+                recognition.interimResults = false;
+
+                recognition.onstart = () => {
+                    isRecording = true;
+                    btn.textContent = 'Stop Recording';
+                    btn.classList.add('recording');
+                    status.innerHTML = '<div class="info">🎤 Listening... Speak now!</div>';
+                    result.style.display = 'none';
+                };
+
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    const confidence = (event.results[0][0].confidence * 100).toFixed(1);
+
+                    result.innerHTML = `
+                        <div class="success">✅ Transcription successful!</div>
+                        <div><strong>You said:</strong> "${transcript}"</div>
+                        <div><strong>Confidence:</strong> ${confidence}%</div>
+                    `;
+                    result.style.display = 'block';
+                    status.innerHTML = '<div class="success">Recording complete!</div>';
+                };
+
+                recognition.onerror = (event) => {
+                    status.innerHTML = `<div class="error">❌ Error: ${event.error}</div>`;
+                    if (event.error === 'no-speech') {
+                        status.innerHTML += '<div class="info">No speech detected. Try speaking louder.</div>';
+                    } else if (event.error === 'not-allowed') {
+                        status.innerHTML += '<div class="info">Microphone permission denied.</div>';
+                    }
+                };
+
+                recognition.onend = () => {
+                    isRecording = false;
+                    btn.textContent = 'Start Recording';
+                    btn.classList.remove('recording');
+                };
+
+                recognition.start();
+            } catch (err) {
+                status.innerHTML = `<div class="error">❌ Error: ${err.message}</div>`;
+            }
+        }
+
+        function stopRecording() {
+            if (recognition) {
+                recognition.stop();
+            }
+        }
+
+        // 4. Test Speech Synthesis
+        function testSpeech() {
+            const status = document.getElementById('speech-status');
+
+            if (!('speechSynthesis' in window)) {
+                status.innerHTML = '<div class="error">❌ Speech Synthesis not supported</div>';
+                return;
+            }
+
+            const text = "Hello! This is a test of the speech synthesis feature. If you can hear this, audio output is working correctly.";
+            const utterance = new SpeechSynthesisUtterance(text);
+
+            utterance.onstart = () => {
+                status.innerHTML = '<div class="info">🔊 Speaking...</div>';
+            };
+
+            utterance.onend = () => {
+                status.innerHTML = '<div class="success">✅ Audio output test complete!</div>';
+            };
+
+            utterance.onerror = (event) => {
+                status.innerHTML = `<div class="error">❌ Error: ${event.error}</div>`;
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function stopSpeech() {
+            window.speechSynthesis.cancel();
+            document.getElementById('speech-status').innerHTML = '<div class="info">Audio stopped</div>';
+        }
+
+        // 5. Full Test
+        async function fullTest() {
+            const status = document.getElementById('full-test-status');
+            const btn = document.getElementById('full-test-btn');
+
+            btn.disabled = true;
+            status.innerHTML = '<div class="info">Starting full test...</div>';
+
+            try {
+                // Step 1: Check support
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SpeechRecognition) {
+                    throw new Error('Speech Recognition not supported');
+                }
+
+                // Step 2: Start recording
+                status.innerHTML = '<div class="info">🎤 Please say something...</div>';
+
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'en-US';
+
+                const transcript = await new Promise((resolve, reject) => {
+                    recognition.onresult = (event) => {
+                        resolve(event.results[0][0].transcript);
+                    };
+                    recognition.onerror = (event) => {
+                        reject(new Error(event.error));
+                    };
+                    recognition.start();
+                });
+
+                // Step 3: Speak it back
+                status.innerHTML = `<div class="success">✅ Heard: "${transcript}"</div><div class="info">🔊 Speaking it back...</div>`;
+
+                await new Promise((resolve, reject) => {
+                    const utterance = new SpeechSynthesisUtterance(`You said: ${transcript}`);
+                    utterance.onend = resolve;
+                    utterance.onerror = reject;
+                    window.speechSynthesis.speak(utterance);
+                });
+
+                status.innerHTML = `
+                    <div class="success">✅ Full test complete!</div>
+                    <div class="success">Voice input and output are working correctly.</div>
+                `;
+            } catch (err) {
+                status.innerHTML = `<div class="error">❌ Test failed: ${err.message}</div>`;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // Auto-check support on load
+        window.onload = () => {
+            checkSupport();
+        };
+    </script>
+</body>
+
+</html>

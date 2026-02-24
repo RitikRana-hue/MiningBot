@@ -24,18 +24,17 @@ export default function ChatMessage({ role, content }: ChatMessageProps) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`py-6 ${isUser ? "bg-transparent" : "bg-zinc-900/30"}`}
+      className={`py-6 ${isUser ? "bg-transparent" : "bg-zinc-900/30 light:bg-zinc-100/50"} transition-colors duration-300`}
     >
       <div className="mx-auto max-w-3xl px-4">
         <div className={`flex gap-4 ${isUser ? "flex-row-reverse" : ""}`}>
           {/* Avatar */}
           <div className="shrink-0">
             <div
-              className={`flex h-10 w-10 items-center justify-center rounded-xl shadow-lg ${
-                isUser
-                  ? "bg-gradient-to-br from-blue-500 to-blue-600 shadow-blue-500/20"
-                  : "bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-emerald-500/20"
-              }`}
+              className={`flex h-10 w-10 items-center justify-center rounded-xl shadow-lg ${isUser
+                ? "bg-gradient-to-br from-blue-500 to-blue-600 shadow-blue-500/20"
+                : "bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-emerald-500/20"
+                }`}
             >
               {isUser ? (
                 <User className="h-5 w-5 text-white" />
@@ -49,8 +48,8 @@ export default function ChatMessage({ role, content }: ChatMessageProps) {
           <div className={`flex-1 min-w-0 ${isUser ? "text-right" : ""}`}>
             {/* Name and time */}
             <div className={`flex items-center gap-2 mb-2 ${isUser ? "justify-end" : ""}`}>
-              <span className="text-sm font-medium text-zinc-300">
-                {isUser ? "You" : "Mining Assistant"}
+              <span className="text-sm font-medium text-zinc-300 light:text-zinc-700 transition-colors duration-300">
+                {isUser ? "You" : "MineGPT"}
               </span>
               {!isUser && (
                 <span className="flex items-center gap-1 text-xs text-emerald-500">
@@ -62,16 +61,14 @@ export default function ChatMessage({ role, content }: ChatMessageProps) {
 
             {/* Message bubble */}
             <div
-              className={`group relative inline-block max-w-full ${
-                isUser ? "text-right" : "text-left"
-              }`}
+              className={`group relative inline-block max-w-full ${isUser ? "text-right" : "text-left"
+                }`}
             >
               <div
-                className={`inline-block px-4 py-3 rounded-2xl ${
-                  isUser
-                    ? "bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-tr-sm"
-                    : "bg-zinc-800/80 text-zinc-100 border border-zinc-700/50 rounded-tl-sm backdrop-blur-sm"
-                }`}
+                className={`inline-block px-4 py-3 rounded-2xl ${isUser
+                  ? "bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-tr-sm"
+                  : "bg-zinc-800/80 light:bg-zinc-100 text-zinc-100 light:text-zinc-900 border border-zinc-700/50 light:border-zinc-300 rounded-tl-sm backdrop-blur-sm transition-colors duration-300"
+                  }`}
               >
                 <p className="text-[15px] leading-relaxed whitespace-pre-wrap break-words">
                   {content}
@@ -82,7 +79,7 @@ export default function ChatMessage({ role, content }: ChatMessageProps) {
               {!isUser && (
                 <button
                   onClick={handleCopy}
-                  className="absolute -right-2 top-0 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 bg-zinc-800 border border-zinc-700 rounded-lg hover:bg-zinc-700 text-zinc-400 hover:text-white"
+                  className="absolute -right-2 top-0 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 bg-zinc-800 light:bg-zinc-200 border border-zinc-700 light:border-zinc-300 rounded-lg hover:bg-zinc-700 light:hover:bg-zinc-300 text-zinc-400 light:text-zinc-600 hover:text-white light:hover:text-zinc-900 transition-colors duration-300"
                   title="Copy message"
                 >
                   {copied ? (
@@ -95,7 +92,7 @@ export default function ChatMessage({ role, content }: ChatMessageProps) {
             </div>
 
             {/* Timestamp */}
-            <div className={`mt-1.5 text-xs text-zinc-600 ${isUser ? "text-right" : ""}`}>
+            <div className={`mt-1.5 text-xs text-zinc-600 light:text-zinc-500 transition-colors duration-300 ${isUser ? "text-right" : ""}`}>
               {new Date().toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",

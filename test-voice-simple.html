@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Simple Voice Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        button:hover {
+            background: #059669;
+        }
+
+        .recording {
+            background: #ef4444 !important;
+        }
+
+        #output {
+            margin-top: 20px;
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 8px;
+            min-height: 100px;
+        }
+
+        .log {
+            margin: 5px 0;
+            padding: 5px;
+            background: #333;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🎤 Simple Voice Test</h1>
+    <p>Click Start → Speak → Click Stop → See transcript</p>
+
+    <button id="startBtn" onclick="startRecording()">Start Recording</button>
+    <button id="stopBtn" onclick="stopRecording()" disabled>Stop Recording</button>
+
+    <div id="output"></div>
+
+    <script>
+        let recognition = null;
+        let isRecording = false;
+
+        function log(message, type = 'info') {
+            const output = document.getElementById('output');
+            const div = document.createElement('div');
+            div.className = 'log';
+            div.style.color = type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#3b82f6';
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            output.appendChild(div);
+            output.scrollTop = output.scrollHeight;
+            console.log(message);
+        }
+
+        // Initialize
+        window.onload = () => {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+
+                recognition.onstart = () => {
+                    log('✅ Recognition started', 'success');
+                    isRecording = true;
+                    document.getElementById('startBtn').disabled = true;
+                    document.getElementById('stopBtn').disabled = false;
+                    document.getElementById('startBtn').classList.add('recording');
+                };
+
+                recognition.onend = () => {
+                    log('✅ Recognition ended', 'info');
+                    isRecording = false;
+                    document.getElementById('startBtn').disabled = false;
+                    document.getElementById('stopBtn').disabled = true;
+                    document.getElementById('startBtn').classList.remove('recording');
+                };
+
+                recognition.onresult = (event) => {
+                    log('✅ Got result event', 'success');
+                    log(`Results length: ${event.results.length}`, 'info');
+
+                    if (event.results && event.results.length > 0) {
+                        const transcript = event.results[0][0].transcript;
+                        const confidence = (event.results[0][0].confidence * 100).toFixed(1);
+                        log(`📝 Transcript: "${transcript}"`, 'success');
+                        log(`📊 Confidence: ${confidence}%`, 'info');
+
+                        // Show big result
+                        const resultDiv = document.createElement('div');
+                        resultDiv.style.cssText = 'margin-top: 20px; padding: 20px; background: #10b981; border-radius: 8px; font-size: 18px;';
+                        resultDiv.textContent = `You said: "${transcript}"`;
+                        document.getElementById('output').appendChild(resultDiv);
+                    } else {
+                        log('❌ No results in event', 'error');
+                    }
+                };
+
+                recognition.onerror = (event) => {
+                    log(`❌ Error: ${event.error}`, 'error');
+
+                    if (event.error === 'no-speech') {
+                        log('No speech detected. Try speaking louder.', 'error');
+                    } else if (event.error === 'not-allowed') {
+                        log('Microphone permission denied!', 'error');
+                    } else if (event.error === 'network') {
+                        log('Network error. Check internet connection.', 'error');
+                    }
+                };
+
+                recognition.onspeechstart = () => {
+                    log('🎤 Speech detected!', 'success');
+                };
+
+                recognition.onspeechend = () => {
+                    log('🎤 Speech ended', 'info');
+                };
+
+                recognition.onaudiostart = () => {
+                    log('🔊 Audio capture started', 'info');
+                };
+
+                recognition.onaudioend = () => {
+                    log('🔊 Audio capture ended', 'info');
+                };
+
+                log('✅ Speech Recognition initialized', 'success');
+            } else {
+                log('❌ Speech Recognition not supported in this browser', 'error');
+                document.getElementById('startBtn').disabled = true;
+            }
+        };
+
+        function startRecording() {
+            if (!recognition) {
+                log('❌ Recognition not initialized', 'error');
+                return;
+            }
+
+            try {
+                log('🎤 Starting recording...', 'info');
+                recognition.start();
+            } catch (err) {
+                log(`❌ Error starting: ${err.message}`, 'error');
+            }
+        }
+
+        function stopRecording() {
+            if (!recognition) {
+                log('❌ Recognition not initialized', 'error');
+                return;
+            }
+
+            try {
+                log('🛑 Stopping recording...', 'info');
+                recognition.stop();
+            } catch (err) {
+                log(`❌ Error stopping: ${err.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+
+</html>

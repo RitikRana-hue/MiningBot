@@ -1,7 +1,22 @@
-# Mining Chatbot Dependencies
-# Core dependencies (none required for basic functionality)
+# MineGPT Backend Dependencies
 
-# Optional dependencies for future enhancements:
-# openai>=1.0.0        # For AI-powered responses
-# python-dotenv>=1.0.0 # For environment variable management
-# requests>=2.31.0     # For API calls to mining data services
+# Core Framework
+flask==3.1.0
+flask-cors==6.0.2
+
+# PDF Processing & RAG
+pypdf2==3.0.1
+sentence-transformers==5.2.3
+faiss-cpu==1.13.2
+
+# AI/ML
+google-genai==1.64.0
+scikit-learn==1.8.0
+numpy==2.4.2
+
+# NLP (optional but recommended)
+transformers==5.2.0
+torch==2.10.0
+
+# Utilities
+python-dotenv==1.0.0

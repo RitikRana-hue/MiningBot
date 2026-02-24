@@ -36,7 +36,7 @@ import Link from "next/link";
 const mainServices = [
   {
     icon: <Brain className="h-8 w-8" />,
-    title: "AI Mining Assistant",
+    title: "MineGPT",
     description:
       "24/7 intelligent chatbot trained on mining regulations, safety protocols, and operational best practices. Get instant answers to complex mining queries.",
     features: [

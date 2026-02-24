@@ -9,13 +9,13 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Mining Bot - AI-Powered Mining Intelligence",
+  title: "MineGPT - AI-Powered Mining Intelligence",
   description: "Transform your mining operations with real-time AI insights, predictive analytics, and intelligent automation.",
   keywords: "mining, AI, coal mining, safety, production analytics, real-time monitoring",
-  authors: [{ name: "Mining Bot Team" }],
+  authors: [{ name: "MineGPT Team" }],
   robots: "index, follow",
   openGraph: {
-    title: "Mining Bot - AI-Powered Mining Intelligence",
+    title: "MineGPT - AI-Powered Mining Intelligence",
     description: "Transform your mining operations with real-time AI insights",
     type: "website",
     locale: "en_US",

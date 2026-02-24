@@ -33,8 +33,8 @@ const contactMethods = [
     icon: <Mail className="h-6 w-6" />,
     title: "Email Us",
     description: "Our team will respond within 24 hours",
-    value: "contact@coalmineai.com",
-    link: "mailto:contact@coalmineai.com",
+    value: "contact@minegpt.com",
+    link: "mailto:contact@minegpt.com",
     color: "bg-emerald-500/10 text-emerald-400",
   },
   {
@@ -114,10 +114,10 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     // Simulate form submission
     await new Promise((resolve) => setTimeout(resolve, 1500));
-    
+
     setIsSubmitting(false);
     setSubmitted(true);
   };
@@ -149,7 +149,7 @@ export default function ContactPage() {
               <span className="text-emerald-400"> Conversation</span>
             </h1>
             <p className="text-xl text-zinc-400 max-w-2xl mx-auto">
-              Have questions about our AI solutions? Want to schedule a demo? 
+              Have questions about our AI solutions? Want to schedule a demo?
               Our team is here to help transform your mining operations.
             </p>
           </FadeInUp>

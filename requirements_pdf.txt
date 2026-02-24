@@ -1,0 +1,8 @@
+# PDF RAG System Requirements
+pypdf2
+langchain
+langchain-community
+faiss-cpu
+sentence-transformers
+chromadb
+tiktoken

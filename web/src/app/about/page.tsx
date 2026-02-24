@@ -138,7 +138,7 @@ export default function AboutPage() {
               <span className="text-emerald-400"> with AI</span>
             </h1>
             <p className="text-xl text-zinc-400 max-w-3xl">
-              We&apos;re on a mission to make mining safer, more efficient, and sustainable 
+              We&apos;re on a mission to make mining safer, more efficient, and sustainable
               through the power of artificial intelligence.
             </p>
           </FadeInUp>
@@ -175,8 +175,8 @@ export default function AboutPage() {
                 </div>
                 <h2 className="text-3xl font-bold mb-4">Our Mission</h2>
                 <p className="text-lg text-zinc-400 leading-relaxed">
-                  To revolutionize the mining industry by providing AI-powered solutions that 
-                  prioritize safety, enhance operational efficiency, and drive sustainable practices. 
+                  To revolutionize the mining industry by providing AI-powered solutions that
+                  prioritize safety, enhance operational efficiency, and drive sustainable practices.
                   We believe technology can protect lives while maximizing productivity.
                 </p>
               </div>
@@ -189,8 +189,8 @@ export default function AboutPage() {
                 </div>
                 <h2 className="text-3xl font-bold mb-4">Our Vision</h2>
                 <p className="text-lg text-zinc-400 leading-relaxed">
-                  To become the global leader in AI-powered mining solutions, setting new standards 
-                  for safety and efficiency in the industry. We envision a future where every mining 
+                  To become the global leader in AI-powered mining solutions, setting new standards
+                  for safety and efficiency in the industry. We envision a future where every mining
                   operation is powered by intelligent technology.
                 </p>
               </div>
@@ -212,12 +212,12 @@ export default function AboutPage() {
                 <span className="text-emerald-400"> Experts</span>
               </h2>
               <p className="text-lg text-zinc-400 mb-6">
-                CoalMine AI was founded by a team of mining industry veterans and AI researchers 
+                MineGPT was founded by a team of mining industry veterans and AI researchers
                 who saw the potential for technology to transform one of the world&apos;s oldest industries.
               </p>
               <p className="text-lg text-zinc-400 mb-8">
-                After witnessing firsthand the challenges faced by mining operations — from safety 
-                incidents to inefficient processes — we set out to build solutions that could make 
+                After witnessing firsthand the challenges faced by mining operations — from safety
+                incidents to inefficient processes — we set out to build solutions that could make
                 a real difference. Today, we&apos;re proud to serve over 500 mines across India.
               </p>
               <div className="flex items-center gap-4">
@@ -352,7 +352,7 @@ export default function AboutPage() {
 
           <div className="relative">
             <div className="absolute left-1/2 top-0 bottom-0 w-px bg-zinc-800 hidden md:block" />
-            
+
             {milestones.map((milestone, i) => (
               <FadeInUp key={milestone.year} delay={i * 0.1}>
                 <div className={`flex items-center gap-8 mb-8 ${i % 2 === 1 ? 'md:flex-row-reverse' : ''}`}>
@@ -399,7 +399,7 @@ export default function AboutPage() {
               Join Us in Transforming Mining
             </h2>
             <p className="text-xl text-zinc-400 mb-8">
-              Whether you&apos;re a mining company looking to modernize or a talented individual 
+              Whether you&apos;re a mining company looking to modernize or a talented individual
               wanting to make an impact, we&apos;d love to hear from you.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

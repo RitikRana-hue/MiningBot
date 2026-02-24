@@ -14,7 +14,7 @@ interface PaymentContextType {
 
 const PaymentContext = createContext<PaymentContextType | undefined>(undefined);
 
-const ORDERS_STORAGE_KEY = "coalmine-orders";
+const ORDERS_STORAGE_KEY = "minegpt-orders";
 
 export function PaymentProvider({ children }: { children: ReactNode }) {
   const [orders, setOrders] = useState<PaymentOrder[]>([]);
@@ -46,7 +46,7 @@ export function PaymentProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
 
     try {
-      const authData = localStorage.getItem("coalmine-auth");
+      const authData = localStorage.getItem("minegpt-auth");
       if (!authData) {
         return {
           success: false,

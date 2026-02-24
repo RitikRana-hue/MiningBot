@@ -1,29 +1,22 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import ChatMessage from "@/components/ChatMessage";
 import ChatInput from "@/components/ChatInput";
 import Sidebar, { ChatHistory } from "@/components/Sidebar";
 import FileUpload from "@/components/FileUpload";
 import SettingsModal, { Settings } from "@/components/SettingsModal";
-import ProfileModal from "@/components/ProfileModal";
-import { useAuth } from "@/context/AuthContext";
-import { 
-  HardHat, 
-  Upload, 
-  X, 
-  Coins, 
-  Sparkles, 
-  AlertCircle,
-  ArrowRight,
+import { useVoice } from "@/hooks/useVoice";
+import {
+  HardHat,
+  Upload,
+  X,
+  Sparkles,
   Zap,
   Shield,
   BarChart3,
-  LogOut,
-  ChevronRight
+  Volume2,
 } from "lucide-react";
 
 interface Message {
@@ -39,7 +32,7 @@ const DEFAULT_SETTINGS: Settings = {
   units: "metric",
   language: "english",
   autoSave: true,
-  soundEnabled: false,
+  soundEnabled: true, // Enable sound by default for voice responses
   fontSize: "medium",
   responseSpeed: "normal",
 };
@@ -49,8 +42,6 @@ const STORAGE_KEYS = {
   SETTINGS: "coal-mining-settings",
 };
 
-const TOKEN_COST_PER_MESSAGE = 1;
-
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -58,13 +49,38 @@ export default function Home() {
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [showSettings, setShowSettings] = useState(false);
-  const [showProfile, setShowProfile] = useState(false);
   const [showFileUpload, setShowFileUpload] = useState(false);
-  const [showNoTokensModal, setShowNoTokensModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
-  const { user, isLoading: authLoading, deductTokens, logout } = useAuth();
-  const router = useRouter();
+
+  // Voice functionality
+  const {
+    isRecording,
+    isSpeaking,
+    startRecording,
+    stopRecording,
+    speak,
+    stopSpeaking,
+    isSupported: isVoiceSupported,
+    error: voiceError,
+    transcript
+  } = useVoice();
+
+  // When transcript changes and is not empty, send it
+  useEffect(() => {
+    if (transcript && transcript.trim() && !isRecording) {
+      console.log("📝 Transcript ready:", transcript);
+      // Always enable voice response when using voice input
+      handleSend(transcript, true);
+    }
+  }, [transcript, isRecording]);
+
+  // Show voice error notification
+  useEffect(() => {
+    if (voiceError) {
+      console.error("Voice error:", voiceError);
+      alert(voiceError);
+    }
+  }, [voiceError]);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -161,26 +177,7 @@ export default function Home() {
     setMessages([]);
   };
 
-  const handleSend = async (message: string) => {
-    // Check if user has tokens
-    if (!user) {
-      router.push("/login");
-      return;
-    }
-
-    // Check and deduct tokens
-    if (user.plan !== 'enterprise' && user.tokens < TOKEN_COST_PER_MESSAGE) {
-      setShowNoTokensModal(true);
-      return;
-    }
-
-    // Deduct token
-    const success = deductTokens(TOKEN_COST_PER_MESSAGE);
-    if (!success && user.plan !== 'enterprise') {
-      setShowNoTokensModal(true);
-      return;
-    }
-
+  const handleSend = async (message: string, shouldSpeak: boolean = false) => {
     const userMessage: Message = { role: "user", content: message };
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
@@ -216,6 +213,30 @@ export default function Home() {
           content: data.response,
         };
         setMessages((prev) => [...prev, assistantMessage]);
+
+        // Speak the response if voice was used or sound is enabled
+        if (shouldSpeak && settings.soundEnabled && isVoiceSupported) {
+          console.log("🔊 Speaking response...");
+          try {
+            await speak(data.response);
+            console.log("✅ Finished speaking");
+          } catch (err: any) {
+            // Only log actual errors, not interruptions
+            if (err.message && !err.message.includes('interrupted') && !err.message.includes('canceled')) {
+              console.error("❌ Error speaking response:", err);
+            } else {
+              console.log("ℹ️ Speech was stopped by user");
+            }
+          }
+        } else {
+          if (!shouldSpeak) {
+            console.log("ℹ️ Not speaking (text input used)");
+          } else if (!settings.soundEnabled) {
+            console.log("ℹ️ Not speaking (sound disabled in settings)");
+          } else if (!isVoiceSupported) {
+            console.log("ℹ️ Not speaking (voice not supported)");
+          }
+        }
       }
     } catch (error) {
       console.error("Error sending message:", error);
@@ -229,9 +250,19 @@ export default function Home() {
     }
   };
 
-  const handleVoiceRecord = () => {
-    // Placeholder for voice recording functionality
-    alert("Voice recording feature coming soon! This will allow you to send messages using your voice.");
+  const handleStartRecording = () => {
+    if (!isVoiceSupported) {
+      alert("Voice input is not supported in your browser. Please use Chrome, Edge, or Safari.");
+      return;
+    }
+
+    // Stop any ongoing speech
+    stopSpeaking();
+    startRecording();
+  };
+
+  const handleStopRecording = () => {
+    stopRecording();
   };
 
   const handleFileUpload = async (file: File) => {
@@ -282,7 +313,7 @@ export default function Home() {
       console.error("Error uploading file:", error);
       const errorMessage: Message = {
         role: "assistant",
-        content: "Sorry, failed to process the file. Please try again.",
+        content: "Sorry, failed to process file. Please try again.",
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
@@ -290,55 +321,13 @@ export default function Home() {
     }
   };
 
-  // Show loading while checking auth
-  if (authLoading) {
-    return (
-      <div className="h-screen bg-zinc-950 flex items-center justify-center">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full"
-        />
-      </div>
-    );
-  }
-
-  // Redirect to login if not authenticated
-  if (!user) {
-    return (
-      <div className="h-screen bg-zinc-950 flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center max-w-md px-4"
-        >
-          <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <HardHat className="h-10 w-10 text-emerald-400" />
-          </div>
-          <h1 className="text-3xl font-bold text-white mb-4">Login Required</h1>
-          <p className="text-zinc-400 mb-8">
-            Please login or create an account to access the AI Mining Assistant.
-            You&apos;ll get 100 free tokens to start!
-          </p>
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-emerald-600 text-white font-semibold rounded-full hover:bg-emerald-500 transition-colors"
-          >
-            Login / Sign Up
-            <ArrowRight className="h-5 w-5" />
-          </Link>
-        </motion.div>
-      </div>
-    );
-  }
-
   return (
     <div className="h-screen bg-zinc-950 overflow-hidden flex">
       {/* Sidebar */}
       <Sidebar
         onNewChat={handleNewChat}
         onOpenSettings={() => setShowSettings(true)}
-        onOpenProfile={() => setShowProfile(true)}
+        onOpenProfile={() => { }} // Empty function since profile is removed
         chatHistory={chatHistory}
         currentChatId={currentChatId}
         onSelectChat={handleSelectChat}
@@ -357,14 +346,6 @@ export default function Home() {
             </h2>
           </div>
           <div className="flex items-center gap-3">
-            {/* Token Balance */}
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-full">
-              <Coins className="h-4 w-4 text-emerald-400" />
-              <span className="text-sm font-medium text-emerald-400">
-                {user.plan === 'enterprise' ? '∞' : user.tokens}
-              </span>
-              <span className="text-xs text-zinc-500">tokens</span>
-            </div>
             {/* Upload Button */}
             <button
               onClick={() => setShowFileUpload(!showFileUpload)}
@@ -413,25 +394,22 @@ export default function Home() {
                     <HardHat className="h-10 w-10 text-white" />
                   </div>
                 </div>
-                
+
                 <h1 className="text-3xl font-bold text-white mb-3">
-                  AI Mining Assistant
+                  MineGPT
                 </h1>
-                <p className="text-zinc-400 mb-2">
-                  Ask me anything about coal mining operations, safety protocols, 
+                <p className="text-zinc-400 mb-8">
+                  Ask me anything about coal mining operations, safety protocols,
                   production analysis, and more!
-                </p>
-                <p className="text-sm text-zinc-500 mb-8">
-                  Each message costs 1 token • Upload files for detailed analysis
                 </p>
 
                 {/* Quick action cards */}
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   {[
-                    { icon: <Sparkles className="h-4 w-4" />, text: "What types of coal exist?", color: "emerald" },
-                    { icon: <Shield className="h-4 w-4" />, text: "Safety requirements for mining", color: "amber" },
-                    { icon: <BarChart3 className="h-4 w-4" />, text: "Analyze production data", color: "blue" },
-                    { icon: <Zap className="h-4 w-4" />, text: "Underground mining methods", color: "purple" },
+                    { icon: <Sparkles className="h-4 w-4" />, text: "What is spontaneous combustion?", color: "emerald" },
+                    { icon: <Shield className="h-4 w-4" />, text: "How to prevent coal fires?", color: "amber" },
+                    { icon: <BarChart3 className="h-4 w-4" />, text: "What is gold mining?", color: "blue" },
+                    { icon: <Zap className="h-4 w-4" />, text: "Open-pit vs underground mining", color: "purple" },
                   ].map((item, i) => (
                     <motion.button
                       key={i}
@@ -500,76 +478,57 @@ export default function Home() {
 
         {/* Input */}
         <div className="border-t border-zinc-800/50 bg-zinc-950">
-          <ChatInput
-            onSend={handleSend}
-            disabled={isLoading || (user.plan !== 'enterprise' && user.tokens < TOKEN_COST_PER_MESSAGE)}
-            onFileUpload={() => setShowFileUpload(true)}
-            onVoiceRecord={handleVoiceRecord}
-          />
-          {user.plan !== 'enterprise' && user.tokens < TOKEN_COST_PER_MESSAGE && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mx-4 mb-4 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center justify-between"
-            >
-              <div className="flex items-center gap-3">
-                <AlertCircle className="h-5 w-5 text-amber-400" />
-                <span className="text-amber-400 text-sm">You&apos;ve run out of tokens</span>
-              </div>
-              <Link
-                href="/pricing"
-                className="text-sm font-medium text-amber-400 hover:text-amber-300 flex items-center gap-1"
+          {/* Voice status indicator */}
+          <AnimatePresence>
+            {(isRecording || isSpeaking) && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="px-6 py-3 border-b border-zinc-800/50"
               >
-                Buy more <ChevronRight className="h-4 w-4" />
-              </Link>
-            </motion.div>
-          )}
+                <div className="max-w-3xl mx-auto flex items-center gap-3">
+                  {isRecording && (
+                    <>
+                      <motion.div
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                        className="w-3 h-3 rounded-full bg-red-500"
+                      />
+                      <span className="text-sm text-zinc-400">
+                        Listening... Speak now
+                      </span>
+                    </>
+                  )}
+                  {isSpeaking && (
+                    <>
+                      <Volume2 className="h-4 w-4 text-emerald-500" />
+                      <span className="text-sm text-zinc-400">
+                        Speaking response...
+                      </span>
+                      <button
+                        onClick={stopSpeaking}
+                        className="ml-auto text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+                      >
+                        Stop
+                      </button>
+                    </>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <ChatInput
+            onSend={(msg) => handleSend(msg, false)}
+            disabled={isLoading || isSpeaking}
+            onFileUpload={() => setShowFileUpload(true)}
+            isRecording={isRecording}
+            onStartRecording={handleStartRecording}
+            onStopRecording={handleStopRecording}
+          />
         </div>
       </div>
-
-      {/* No Tokens Modal */}
-      <AnimatePresence>
-        {showNoTokensModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
-            onClick={() => setShowNoTokensModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 max-w-md w-full text-center"
-            >
-              <div className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Coins className="h-8 w-8 text-amber-400" />
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-2">Out of Tokens</h3>
-              <p className="text-zinc-400 mb-6">
-                You&apos;ve used all your free tokens. Upgrade your plan to continue using the AI assistant.
-              </p>
-              <div className="flex flex-col gap-3">
-                <Link
-                  href="/pricing"
-                  className="w-full py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-500 transition-colors flex items-center justify-center gap-2"
-                >
-                  View Pricing Plans
-                  <ArrowRight className="h-5 w-5" />
-                </Link>
-                <button
-                  onClick={() => setShowNoTokensModal(false)}
-                  className="w-full py-3 bg-zinc-800 text-zinc-300 font-semibold rounded-xl hover:bg-zinc-700 transition-colors"
-                >
-                  Maybe Later
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Settings Modal */}
       <SettingsModal
@@ -578,12 +537,6 @@ export default function Home() {
         settings={settings}
         onSave={saveSettings}
         onClearHistory={handleClearHistory}
-      />
-
-      {/* Profile Modal */}
-      <ProfileModal
-        isOpen={showProfile}
-        onClose={() => setShowProfile(false)}
       />
     </div>
   );

@@ -1,8 +1,8 @@
 """
-Smart Mining Chatbot with Intelligent Fallback
-1. Analyzes question
-2. Tries local NLP first
-3. Falls back to Gemini AI if needed
+Smart Mining Chatbot with PDF RAG and Gemini AI
+1. Searches user's PDF documents
+2. Uses Gemini AI with PDF context for answers
+3. All answers come from your PDFs
 """
 
 import os
@@ -32,16 +32,19 @@ try:
 except ImportError:
     NLP_AVAILABLE = False
 
-# Gemini AI import
+# Gemini AI import - Try new package first
 try:
     import google.genai as genai
     GEMINI_AVAILABLE = True
+    GEMINI_PACKAGE = 'genai'
 except ImportError:
     try:
         import google.generativeai as genai
         GEMINI_AVAILABLE = True
+        GEMINI_PACKAGE = 'generativeai'
     except ImportError:
         GEMINI_AVAILABLE = False
+        GEMINI_PACKAGE = None
 
 # Web search imports
 try:
@@ -49,6 +52,14 @@ try:
     WEB_SEARCH_AVAILABLE = True
 except ImportError:
     WEB_SEARCH_AVAILABLE = False
+
+# PDF RAG System
+try:
+    from pdf_processor import PDFRAGSystem
+    PDF_RAG_AVAILABLE = True
+except ImportError:
+    PDF_RAG_AVAILABLE = False
+    print("⚠️  PDF RAG system not available")
 
 
 class QuestionAnalyzer:
@@ -92,32 +103,63 @@ class GeminiAI:
     """Gemini AI integration for complex queries."""
     
     def __init__(self):
-        self.model = None
+        self.client = None
+        self.model_name = None
+        
         if GEMINI_AVAILABLE:
             api_key = os.getenv('GEMINI_API_KEY')
             if api_key:
                 try:
-                    genai.configure(api_key=api_key)
-                    model_names = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro']
+                    if GEMINI_PACKAGE == 'genai':
+                        # New google.genai package
+                        from google import genai as genai_new
+                        self.client = genai_new.Client(api_key=api_key)
+                        
+                        # Try models in order of preference
+                        model_names = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-flash-latest']
+                        
+                        for model_name in model_names:
+                            try:
+                                # Test the model
+                                response = self.client.models.generate_content(
+                                    model=model_name,
+                                    contents='Hi'
+                                )
+                                self.model_name = model_name
+                                print(f"✓ Gemini AI connected: {model_name}")
+                                break
+                            except Exception as e:
+                                print(f"  Trying next model... ({model_name} failed)")
+                                continue
                     
-                    for model_name in model_names:
-                        try:
-                            self.model = genai.GenerativeModel(model_name)
-                            test_response = self.model.generate_content("Hi")
-                            print(f"✓ Gemini AI connected: {model_name}")
-                            break
-                        except Exception as e:
-                            continue
+                    elif GEMINI_PACKAGE == 'generativeai':
+                        # Old google.generativeai package
+                        genai.configure(api_key=api_key)
+                        model_names = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro']
+                        
+                        for model_name in model_names:
+                            try:
+                                self.model_name = genai.GenerativeModel(model_name)
+                                test_response = self.model_name.generate_content("Hi")
+                                print(f"✓ Gemini AI connected: {model_name}")
+                                break
+                            except Exception as e:
+                                print(f"  Trying next model... ({model_name} failed)")
+                                continue
+                
                 except Exception as e:
                     print(f"✗ Gemini AI error: {e}")
     
     def is_available(self) -> bool:
         """Check if Gemini is available."""
-        return self.model is not None
+        if GEMINI_PACKAGE == 'genai':
+            return self.client is not None and self.model_name is not None
+        else:
+            return self.model_name is not None
     
     def get_response(self, question: str, context: str = "") -> str:
         """Get response from Gemini AI."""
-        if not self.model:
+        if not self.is_available():
             return None
         
         try:
@@ -133,14 +175,23 @@ class GeminiAI:
             else:
                 prompt = f"{system_prompt}\n\nQuestion: {question}\n\nAnswer:"
             
-            response = self.model.generate_content(prompt)
-            
-            if hasattr(response, 'text'):
+            if GEMINI_PACKAGE == 'genai':
+                # New package API
+                response = self.client.models.generate_content(
+                    model=self.model_name,
+                    contents=prompt
+                )
                 return response.text
-            elif hasattr(response, 'parts'):
-                return ''.join(part.text for part in response.parts)
             else:
-                return str(response)
+                # Old package API
+                response = self.model_name.generate_content(prompt)
+                if hasattr(response, 'text'):
+                    return response.text
+                elif hasattr(response, 'parts'):
+                    return ''.join(part.text for part in response.parts)
+                else:
+                    return str(response)
+        
         except Exception as e:
             print(f"Gemini error: {e}")
             return None
@@ -325,37 +376,49 @@ class EnhancedMiningKnowledgeBase:
 
 
 class SmartMiningChatbot:
-    """Smart chatbot with intelligent source selection."""
+    """PDF RAG chatbot - answers come exclusively from your PDFs."""
     
     def __init__(self):
-        # Initialize knowledge base directly
-        self.knowledge_base = EnhancedMiningKnowledgeBase()
+        # Initialize PDF RAG system
+        if PDF_RAG_AVAILABLE:
+            print("Initializing PDF RAG system...")
+            try:
+                self.pdf_rag = PDFRAGSystem()
+                print("✓ PDF RAG system ready!")
+            except Exception as e:
+                print(f"⚠️  PDF RAG initialization failed: {e}")
+                self.pdf_rag = None
+        else:
+            self.pdf_rag = None
+            print("⚠️  PDF RAG system not available")
         
         # Initialize components
         self.analyzer = QuestionAnalyzer()
         self.gemini = GeminiAI()
         self.conversation_history = []
+    
+    def clean_markdown(self, text: str) -> str:
+        """Remove markdown formatting from text."""
+        import re
         
-        # Initialize local text generation
-        if NLP_AVAILABLE:
-            print("Loading local NLP model...")
-            try:
-                model_name = "google/flan-t5-base"
-                self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-                self.model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
-                self.generator = pipeline(
-                    "text2text-generation",
-                    model=self.model,
-                    tokenizer=self.tokenizer,
-                    max_length=512,
-                    device=0 if torch.cuda.is_available() else -1
-                )
-                print(f"✓ Local NLP model loaded")
-            except Exception as e:
-                print(f"Could not load local model: {e}")
-                self.generator = None
-        else:
-            self.generator = None
+        # Remove bold (**text** or __text__)
+        text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)
+        text = re.sub(r'__(.+?)__', r'\1', text)
+        
+        # Remove italic (*text* or _text_)
+        text = re.sub(r'\*(.+?)\*', r'\1', text)
+        text = re.sub(r'_(.+?)_', r'\1', text)
+        
+        # Remove headers (# text)
+        text = re.sub(r'^#+\s+', '', text, flags=re.MULTILINE)
+        
+        # Remove code blocks (```text```)
+        text = re.sub(r'```.*?```', '', text, flags=re.DOTALL)
+        
+        # Remove inline code (`text`)
+        text = re.sub(r'`(.+?)`', r'\1', text)
+        
+        return text
     
     def is_mining_related(self, question: str) -> bool:
         """Check if question is mining-related."""
@@ -367,40 +430,25 @@ class SmartMiningChatbot:
             'tungsten', 'cobalt', 'graphite', 'rare earth', 'underground', 'surface',
             'quarry', 'drilling', 'blast', 'safety', 'equipment', 'ventilation',
             'crusher', 'conveyor', 'haul', 'truck', 'excavator', 'processing',
-            'flotation', 'smelting', 'refining', 'tailings', 'exploration'
+            'flotation', 'smelting', 'refining', 'tailings', 'exploration',
+            'combustion', 'spontaneous', 'prevention', 'control', 'monitoring'
         ]
         question_lower = question.lower()
         return any(keyword in question_lower for keyword in mining_keywords)
     
-    def get_local_response(self, question: str, context: str = "") -> Optional[str]:
-        """Get response from local NLP model."""
-        if not self.generator:
-            return None
-        
-        try:
-            prompt = f"Answer this mining industry question: {question}"
-            if context:
-                prompt = f"Context: {context[:300]}\n\nQuestion: {question}\n\nAnswer:"
-            
-            response = self.generator(prompt, max_length=300, num_return_sequences=1)
-            return response[0]['generated_text']
-        except Exception as e:
-            print(f"Local model error: {e}")
-            return None
-    
     def get_response(self, question: str) -> dict:
         """
-        Smart response system:
+        PDF RAG response system:
         1. Analyze question
-        2. Try local knowledge base
-        3. If confidence low, try Gemini AI
-        4. Return best response with source info
+        2. Search PDF documents
+        3. Use Gemini AI with PDF context
+        4. Return response with source citations
         """
         
         # Step 1: Check if mining-related
         if not self.is_mining_related(question):
             return {
-                "response": "I'm specialized in mining industry topics only. I can help with questions about gold, copper, iron, diamond, lithium, coal, and all other types of mining, equipment, safety, and processing.",
+                "response": "I'm specialized in mining industry topics. I can help with questions about mining operations, equipment, safety, and processing based on the documents provided.",
                 "confidence": 1.0,
                 "source": "filter",
                 "analysis": {"complexity": "n/a"},
@@ -411,93 +459,84 @@ class SmartMiningChatbot:
         analysis = self.analyzer.analyze(question)
         print(f"Question analysis: {analysis}")
         
-        # Step 3: Try local knowledge base first
-        kb_answer, kb_confidence = self.knowledge_base.find_best_answer(question)
-        print(f"Knowledge base confidence: {kb_confidence:.2f}")
-        
-        # Step 4: Decide on response strategy
-        
-        # High confidence in knowledge base - use it
-        if kb_answer and kb_confidence > 0.7:
+        # Step 3: Search PDF RAG system
+        if not self.pdf_rag or self.pdf_rag.index is None:
             return {
-                "response": kb_answer,
-                "confidence": float(kb_confidence),
-                "source": "local_knowledge_base",
+                "response": "PDF knowledge base is not available. Please ensure PDFs are processed and the system is properly initialized.",
+                "confidence": 0.0,
+                "source": "error",
                 "analysis": analysis,
-                "success": True,
-                "fallback_used": False
+                "success": False
             }
         
-        # Medium confidence - enhance with local NLP
-        if kb_answer and kb_confidence > 0.5:
-            local_enhanced = self.get_local_response(question, kb_answer)
-            if local_enhanced and len(local_enhanced) > 50:
+        try:
+            # Search PDFs
+            pdf_results = self.pdf_rag.search(question, top_k=5)
+            
+            if not pdf_results:
                 return {
-                    "response": local_enhanced,
-                    "confidence": float(kb_confidence),
-                    "source": "local_nlp_enhanced",
+                    "response": "I couldn't find relevant information in the provided documents. Please try rephrasing your question or ensure the topic is covered in the PDFs.",
+                    "confidence": 0.0,
+                    "source": "no_results",
+                    "analysis": analysis,
+                    "success": False
+                }
+            
+            # Get confidence and context
+            pdf_confidence = pdf_results[0]['similarity_score']
+            print(f"PDF RAG confidence: {pdf_confidence:.2f}")
+            
+            # Prepare context from top results
+            pdf_context = "\n\n".join([r['text'] for r in pdf_results])
+            pdf_sources = [r['metadata']['source'] for r in pdf_results]
+            
+            # Step 4: Use Gemini AI with PDF context
+            if not self.gemini.is_available():
+                # Fallback: return raw PDF content if Gemini not available
+                return {
+                    "response": f"Based on the documents:\n\n{pdf_results[0]['text']}",
+                    "confidence": float(pdf_confidence),
+                    "source": "pdf_raw",
                     "analysis": analysis,
                     "success": True,
-                    "fallback_used": False
+                    "pdf_sources": list(set(pdf_sources))
                 }
-            else:
-                # Local NLP failed, use knowledge base
-                return {
-                    "response": kb_answer,
-                    "confidence": float(kb_confidence),
-                    "source": "local_knowledge_base",
-                    "analysis": analysis,
-                    "success": True,
-                    "fallback_used": False
-                }
-        
-        # Low confidence or complex question - try Gemini AI
-        if self.gemini.is_available():
-            print("Using Gemini AI fallback...")
-            gemini_response = self.gemini.get_response(question, kb_answer if kb_answer else "")
+            
+            print("Using Gemini AI with PDF context...")
+            gemini_response = self.gemini.get_response(question, pdf_context)
             
             if gemini_response:
+                # Clean markdown formatting
+                cleaned_response = self.clean_markdown(gemini_response)
+                
                 return {
-                    "response": gemini_response,
-                    "confidence": 0.9,
-                    "source": "gemini_ai",
+                    "response": cleaned_response,
+                    "confidence": float(pdf_confidence),
+                    "source": "pdf_rag_gemini",
                     "analysis": analysis,
                     "success": True,
-                    "fallback_used": True,
-                    "local_confidence": float(kb_confidence) if kb_answer else 0.0
-                }
-        
-        # Fallback to local NLP if Gemini not available
-        if kb_answer:
-            local_response = self.get_local_response(question, kb_answer)
-            if local_response:
-                return {
-                    "response": local_response,
-                    "confidence": float(kb_confidence),
-                    "source": "local_nlp",
-                    "analysis": analysis,
-                    "success": True,
-                    "fallback_used": False
+                    "pdf_sources": list(set(pdf_sources))
                 }
             else:
+                # Gemini failed, return raw PDF content
                 return {
-                    "response": kb_answer,
-                    "confidence": float(kb_confidence),
-                    "source": "local_knowledge_base",
+                    "response": f"Based on the documents:\n\n{pdf_results[0]['text']}",
+                    "confidence": float(pdf_confidence),
+                    "source": "pdf_raw",
                     "analysis": analysis,
                     "success": True,
-                    "fallback_used": False
+                    "pdf_sources": list(set(pdf_sources))
                 }
         
-        # No good answer found
-        return {
-            "response": "I don't have specific information about that. Try asking about specific mining types (gold, copper, iron, etc.), equipment, safety, or processing methods.",
-            "confidence": 0.2,
-            "source": "none",
-            "analysis": analysis,
-            "success": False,
-            "fallback_used": False
-        }
+        except Exception as e:
+            print(f"Error processing question: {e}")
+            return {
+                "response": f"An error occurred while processing your question: {str(e)}",
+                "confidence": 0.0,
+                "source": "error",
+                "analysis": analysis,
+                "success": False
+            }
     
     def add_to_history(self, question: str, response: dict):
         """Add interaction to conversation history."""
@@ -521,13 +560,22 @@ print("✓ Chatbot ready!")
 
 @app.route('/', methods=['GET'])
 def home():
+    pdf_info = {}
+    if chatbot.pdf_rag:
+        pdf_info = {
+            "available": True,
+            "chunks_indexed": len(chatbot.pdf_rag.chunks),
+            "pdfs_processed": len(set([m['source'] for m in chatbot.pdf_rag.metadata])) if chatbot.pdf_rag.metadata else 0
+        }
+    else:
+        pdf_info = {"available": False}
+    
     return jsonify({
-        "message": "Smart Mining Chatbot API",
-        "strategy": "Local NLP first, Gemini AI fallback",
-        "features": ["Question analysis", "Intelligent source selection", "All mining types"],
-        "knowledge_base_size": len(chatbot.knowledge_base.questions),
-        "gemini_available": chatbot.gemini.is_available(),
-        "local_nlp_available": NLP_AVAILABLE
+        "message": "PDF RAG Mining Chatbot API",
+        "strategy": "PDF RAG → Gemini AI (answers from your PDFs only)",
+        "features": ["PDF document search", "Gemini AI integration", "Source citations"],
+        "pdf_rag": pdf_info,
+        "gemini_available": chatbot.gemini.is_available()
     })
 
 @app.route('/api/chat', methods=['POST', 'OPTIONS'])
@@ -542,6 +590,13 @@ def chat():
         if not question:
             return jsonify({"error": "No question provided"}), 400
         
+        # Log the exact question received for debugging
+        print(f"\n{'='*70}")
+        print(f"📝 Question received: '{question}'")
+        print(f"   Length: {len(question)} characters")
+        print(f"   Type: {type(question)}")
+        print(f"{'='*70}\n")
+        
         result = chatbot.get_response(question)
         chatbot.add_to_history(question, result)
         
@@ -555,15 +610,21 @@ def chat():
 
 @app.route('/api/status', methods=['GET'])
 def status():
+    pdf_info = {}
+    if chatbot.pdf_rag:
+        pdf_info = {
+            "available": True,
+            "chunks_indexed": len(chatbot.pdf_rag.chunks),
+            "pdfs_processed": len(set([m['source'] for m in chatbot.pdf_rag.metadata])) if chatbot.pdf_rag.metadata else 0
+        }
+    else:
+        pdf_info = {"available": False}
+    
     return jsonify({
-        "mode": "smart_hybrid",
-        "local_nlp_available": NLP_AVAILABLE,
+        "mode": "pdf_rag_only",
         "gemini_available": chatbot.gemini.is_available(),
-        "knowledge_base_size": len(chatbot.knowledge_base.questions),
-        "strategy": "Local first, AI fallback",
-        "mining_types": ["coal", "gold", "copper", "iron", "diamond", "lithium", 
-                        "uranium", "bauxite", "nickel", "zinc", "lead", "silver",
-                        "platinum", "tin", "phosphate", "potash", "rare earth", "and more"]
+        "pdf_rag": pdf_info,
+        "strategy": "PDF RAG → Gemini AI (answers from your PDFs only)"
     })
 
 @app.route('/api/health', methods=['GET'])
@@ -571,30 +632,32 @@ def health():
     return jsonify({
         "status": "healthy",
         "mode": "smart_hybrid",
-        "port": 5000
+        "port": 5001
     })
 
 
 if __name__ == '__main__':
     # Get port from environment (for cloud platforms)
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 5001))
     
     # Check if running in production
     debug_mode = os.environ.get('FLASK_ENV', 'production') == 'development'
     
     print("\n" + "=" * 70)
-    print("Smart Mining Industry Chatbot API")
+    print("PDF RAG Mining Chatbot API")
     print("=" * 70)
-    print(f"Local NLP: {'✓ Available' if NLP_AVAILABLE else '✗ Not Available'}")
     print(f"Gemini AI: {'✓ Available' if chatbot.gemini.is_available() else '✗ Not Available'}")
-    print(f"Knowledge Base: {len(chatbot.knowledge_base.questions)} Q&A pairs")
-    print(f"Mining Types: 24+ types covered")
+    if chatbot.pdf_rag:
+        print(f"PDF RAG: ✓ Available ({len(chatbot.pdf_rag.chunks)} chunks indexed)")
+    else:
+        print(f"PDF RAG: ✗ Not Available")
     print("\n" + "=" * 70)
-    print("Smart Strategy:")
-    print("  1. Analyze question complexity")
-    print("  2. Try local knowledge base first")
-    print("  3. If confidence < 70%, use Gemini AI")
-    print("  4. Return best response with source info")
+    print("Strategy:")
+    print("  1. Analyze question")
+    print("  2. Search PDF documents")
+    print("  3. Use Gemini AI with PDF context")
+    print("  4. Return answer with source citations")
+    print("  → All answers come from YOUR PDFs")
     print("=" * 70)
     print(f"\nServer starting on http://0.0.0.0:{port}")
     print(f"Environment: {'Development' if debug_mode else 'Production'}")
