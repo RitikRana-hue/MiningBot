@@ -1,9 +1,26 @@
-# MiningAI Backend Dependencies
+# MiningAI Backend Dependencies - Production Grade
 
 # Core Framework
 flask==3.1.2
 flask-cors==6.0.2
 werkzeug==3.1.5
+gunicorn==23.0.0
+
+# Authentication & Security
+flask-jwt-extended==4.7.1
+flask-limiter==3.8.0
+flask-talisman==1.2.0
+bleach==6.1.0
+python-dotenv==1.0.1
+
+# Database
+sqlalchemy==2.0.36
+psycopg2-binary==2.9.10
+alembic==1.14.0
+
+# Caching & Session
+redis==5.2.1
+flask-session==0.8.0
 
 # PDF Processing & RAG
 pypdf2==3.0.1
@@ -36,8 +53,9 @@ tokenizers==0.22.2
 huggingface_hub==1.4.1
 safetensors==0.7.0
 
-# Web Search (optional)
-duckduckgo_search==8.1.1
+# Monitoring & Logging
+sentry-sdk[flask]==2.22.0
+python-json-logger==3.2.1
 
 # HTTP & Networking
 requests==2.32.5
@@ -46,6 +64,9 @@ httpx==0.28.1
 httpcore==1.0.9
 httplib2==0.31.2
 h11==0.16.0
+certifi==2026.1.4
+
+# Async Support (optional)
 aiohttp==3.13.3
 aiohappyeyeballs==2.6.1
 aiosignal==1.4.0
@@ -58,7 +79,6 @@ anyio==4.12.1
 sniffio==1.3.1
 
 # Utilities
-python-dotenv==1.0.0
 tqdm==4.67.3
 click==8.3.1
 rich==14.3.2
@@ -79,7 +99,6 @@ typing-inspection==0.4.2
 
 # Security & Crypto
 cryptography==46.0.5
-certifi==2026.1.4
 pyasn1==0.6.2
 pyasn1_modules==0.4.2
 cffi==2.0.0
@@ -96,11 +115,6 @@ lxml==6.0.2
 jinja2==3.1.6
 markupsafe==3.0.3
 
-# CLI Tools
-typer==0.24.0
-typer-slim==0.24.0
-shellingham==1.5.4
-
 # Other Dependencies
 attrs==25.4.0
 blinker==1.9.0
@@ -113,6 +127,4 @@ pyparsing==3.3.2
 sympy==1.14.0
 mpmath==1.3.0
 uritemplate==4.2.0
-primp==1.0.0
-annotated-doc==0.0.4
-hf-xet==1.2.0
+

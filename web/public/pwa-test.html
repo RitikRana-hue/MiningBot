@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA Test - Mining Bot</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #18181b;
+            color: #fafafa;
+        }
+
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+
+        .success {
+            background: #064e3b;
+            border-color: #10b981;
+        }
+
+        .error {
+            background: #7f1d1d;
+            border-color: #ef4444;
+        }
+
+        .warning {
+            background: #78350f;
+            border-color: #f59e0b;
+        }
+
+        button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+
+        button:hover {
+            background: #059669;
+        }
+
+        h1 {
+            color: #10b981;
+        }
+
+        code {
+            background: #27272a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔍 PWA Feature Test</h1>
+    <p>This page tests if your Progressive Web App is configured correctly.</p>
+
+    <div id="results"></div>
+
+    <h2>Actions</h2>
+    <button onclick="testInstall()">Test Install Prompt</button>
+    <button onclick="testServiceWorker()">Check Service Worker</button>
+    <button onclick="testManifest()">Check Manifest</button>
+    <button onclick="testOffline()">Test Offline Mode</button>
+
+    <script>
+        const results = document.getElementById('results');
+
+        function addResult(title, message, type = 'success') {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = `<strong>${title}</strong><br>${message}`;
+            results.appendChild(div);
+        }
+
+        // Auto-run tests on load
+        window.addEventListener('load', () => {
+            results.innerHTML = '';
+
+            // Test 1: HTTPS
+            if (location.protocol === 'https:' || location.hostname === 'localhost') {
+                addResult('✓ HTTPS Check', 'Running on HTTPS or localhost - PWA requirements met', 'success');
+            } else {
+                addResult('✗ HTTPS Required', 'PWA requires HTTPS. Use localhost for testing or deploy with HTTPS.', 'error');
+            }
+
+            // Test 2: Service Worker Support
+            if ('serviceWorker' in navigator) {
+                addResult('✓ Service Worker Support', 'Browser supports Service Workers', 'success');
+
+                navigator.serviceWorker.getRegistration().then(reg => {
+                    if (reg) {
+                        addResult('✓ Service Worker Registered', `Scope: ${reg.scope}`, 'success');
+                    } else {
+                        addResult('⚠ Service Worker Not Registered', 'Service worker not found. Make sure you\'re in production mode.', 'warning');
+                    }
+                });
+            } else {
+                addResult('✗ Service Worker Not Supported', 'Browser does not support Service Workers', 'error');
+            }
+
+            // Test 3: Manifest
+            fetch('/manifest.json')
+                .then(res => res.json())
+                .then(manifest => {
+                    addResult('✓ Manifest Found', `App Name: ${manifest.name}<br>Short Name: ${manifest.short_name}`, 'success');
+                })
+                .catch(() => {
+                    addResult('✗ Manifest Not Found', 'Could not load /manifest.json', 'error');
+                });
+
+            // Test 4: Install Prompt Support
+            if ('BeforeInstallPromptEvent' in window || window.matchMedia('(display-mode: standalone)').matches) {
+                if (window.matchMedia('(display-mode: standalone)').matches) {
+                    addResult('✓ App Installed', 'Running in standalone mode - app is already installed!', 'success');
+                } else {
+                    addResult('✓ Install Prompt Available', 'Browser supports install prompts', 'success');
+                }
+            } else {
+                addResult('⚠ Install Prompt', 'Browser may have limited install prompt support', 'warning');
+            }
+
+            // Test 5: Cache API
+            if ('caches' in window) {
+                addResult('✓ Cache API Available', 'Browser supports Cache API for offline functionality', 'success');
+
+                caches.keys().then(keys => {
+                    if (keys.length > 0) {
+                        addResult('✓ Caches Found', `Active caches: ${keys.join(', ')}`, 'success');
+                    }
+                });
+            } else {
+                addResult('✗ Cache API Not Supported', 'Browser does not support Cache API', 'error');
+            }
+        });
+
+        function testInstall() {
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                addResult('ℹ Already Installed', 'App is already running in standalone mode', 'warning');
+                return;
+            }
+
+            addResult('ℹ Install Test', 'Install prompt is triggered automatically. Look for the prompt at the bottom of the screen after 30 seconds, or check your browser\'s address bar for an install icon.', 'warning');
+        }
+
+        function testServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    if (registrations.length > 0) {
+                        registrations.forEach(reg => {
+                            addResult('✓ Service Worker Active',
+                                `Scope: ${reg.scope}<br>State: ${reg.active ? reg.active.state : 'installing'}`,
+                                'success');
+                        });
+                    } else {
+                        addResult('⚠ No Service Workers', 'No service workers registered. Build in production mode.', 'warning');
+                    }
+                });
+            }
+        }
+
+        function testManifest() {
+            fetch('/manifest.json')
+                .then(res => res.json())
+                .then(manifest => {
+                    const details = `
+                        <strong>Name:</strong> ${manifest.name}<br>
+                        <strong>Short Name:</strong> ${manifest.short_name}<br>
+                        <strong>Theme Color:</strong> ${manifest.theme_color}<br>
+                        <strong>Display:</strong> ${manifest.display}<br>
+                        <strong>Icons:</strong> ${manifest.icons.length} icon(s)
+                    `;
+                    addResult('✓ Manifest Details', details, 'success');
+                })
+                .catch(err => {
+                    addResult('✗ Manifest Error', err.message, 'error');
+                });
+        }
+
+        function testOffline() {
+            addResult('ℹ Offline Test',
+                'To test offline mode:<br>1. Open DevTools (F12)<br>2. Go to Network tab<br>3. Check "Offline"<br>4. Refresh the page<br>5. The app should still load from cache',
+                'warning');
+        }
+    </script>
+</body>
+
+</html>

@@ -19,7 +19,7 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   experimental: {
-    optimizeCss: true,
+    optimizeCss: false, // Disable to avoid critters dependency issue
   },
   poweredByHeader: false,
   compress: true,

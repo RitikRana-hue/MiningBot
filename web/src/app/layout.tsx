@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
+import InstallPrompt from "@/components/InstallPrompt";
+import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -14,6 +16,12 @@ export const metadata: Metadata = {
   keywords: "mining, AI, coal mining, safety, production analytics, real-time monitoring",
   authors: [{ name: "MiningAI Team" }],
   robots: "index, follow",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Mining Bot",
+  },
   openGraph: {
     title: "MiningAI - AI-Powered Mining Intelligence",
     description: "Transform your mining operations with real-time AI insights",
@@ -25,6 +33,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  themeColor: "#10b981",
 };
 
 export default function RootLayout({
@@ -39,7 +48,9 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className={`${inter.variable} font-sans antialiased`}>
+        <ServiceWorkerRegistration />
         <Providers>{children}</Providers>
+        <InstallPrompt />
       </body>
     </html>
   );
